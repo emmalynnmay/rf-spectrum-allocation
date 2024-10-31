@@ -31,7 +31,7 @@ class _UserBase(abc.ABC):
 class CognitiveUser(_UserBase):
     """
     Represents a cognitive user in the graph system.  A cognitive user, we have defined as
-    a device user that can search for available frequency bands to
+    a device user that can search for available frequency bands on which to communicate.
     """
     def __init__(self, id, x, y, freq: RadioFrequency=None):
         super().__init__(id, x, y)
@@ -67,6 +67,7 @@ class AuthorizedUser(_UserBase):
         super().__init__(id, x, y)
         self.assignedFrequencies = freqs
 
+
     def grant_frequency(self, frequency: RadioFrequency, user: CognitiveUser):
         """
         Assigns to a `user` the given `frequency`, IF said frequency is assigned to this 
@@ -75,6 +76,7 @@ class AuthorizedUser(_UserBase):
         if frequency not in self.assignedFrequencies:
             raise IndexError(f"{frequency} is not assigned to this authorized user ({self.id})")
         user.set_frequency(frequency)
+
 
     def __str__(self):
         return f"[Authorized User {self.id}]"
