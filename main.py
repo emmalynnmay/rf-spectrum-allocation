@@ -1,5 +1,5 @@
-from agents.coguser import *
-from agents.frequencies import *
+from radiograph.agents.coguser import *
+from radiograph.agents.frequencies import *
 
 f1 = RadioFrequency(1, 107.9)
 f2 = RadioFrequency(2, 103.5)
