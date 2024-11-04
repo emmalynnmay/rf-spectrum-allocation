@@ -1,0 +1,11 @@
+user_id,user_type,x_position,y_position,assigned_frequency
+1,Authorized,43,22,5
+2,Authorized,9,4,2
+3,Authorized,32,24,1
+4,Cognitive,30,18,
+5,Cognitive,27,12,
+6,Cognitive,32,40,
+7,Cognitive,0,21,
+8,Cognitive,50,8,
+9,Cognitive,33,22,
+10,Cognitive,29,50,
