@@ -6,6 +6,7 @@ class RadioFrequency:
         self.id = id
         self.frequency = freq
         self.assignedTo = user
+        self.is_active = False
     
     def __str__(self):
         return f"[Frequency {self.frequency} ({self.id})]"

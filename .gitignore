@@ -4,6 +4,7 @@ node_modules
 .env
 .DS_STORE
 __pycache__/
+__pycache__
 my_env
 *.mov
 
