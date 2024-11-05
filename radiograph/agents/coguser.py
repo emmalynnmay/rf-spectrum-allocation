@@ -8,6 +8,8 @@ class _UserBase(abc.ABC):
     An abstract class to encompass the similarities of both cognitive and authorized users.
     """
     def __init__(self, id, x, y):
+        if x < 0 or y < 0:
+            raise Exception("x & y positions must not be negative.")
         self.id = id
         self.posX = x
         self.posY = y
@@ -76,70 +78,47 @@ class AuthorizedUser(_UserBase):
     users have dedicated frequencies assigned to them, which they are permitted to "lease"
     to other cognitive users when not in use.
     """
-    def __init__(self, id, x, y, freqs: RadioFrequencySpectrum):
+    def __init__(self, id, x, y, assigned_freq: RadioFrequency):
         super().__init__(id, x, y)
-        self.assignedFrequencies = freqs.frequencies
-        self.has_rented_frequencies = [False] * len(freqs.frequencies)
+        self.assignedFrequency = assigned_freq
+        self.has_rented_frequency = False
 
     def grant_frequency(self, frequency: RadioFrequency, user: CognitiveUser):
         """
         Assigns to a `user` the given `frequency`, IF said frequency is assigned to this 
         authorized user.
         """
-        if frequency not in self.assignedFrequencies:
+        if self.is_broadcasting:
+            raise Exception("Frequency cannot be rented out when actively being broadcast on.")
+        if frequency != self.assignedFrequency:
             raise IndexError(f"{frequency} is not assigned to this authorized user ({self.id})")
         user.set_frequency(frequency)
-        index = self.assignedFrequencies.index(frequency)
-        self.has_rented_frequencies[index] = True
+        self.has_rented_frequency = True
 
-    def revoke_frequency(self, frequency: RadioFrequency, user: CognitiveUser):
+    def revoke_frequency(self, user: CognitiveUser):
         user.set_frequency(None)
-        index = self.assignedFrequencies.index(frequency)
-        self.has_rented_frequencies[index] = False
+        self.has_rented_frequency = False
 
-    def begin_broadcasting(self, freq=None):
+    def begin_broadcasting(self):
 
         if self.is_broadcasting:
             print(f"{self.id} is already broadcasting...")
             return
         
-        if freq == None:
-            #If no specific freq is passed in, try each from the list of frequencies we have access to
-
-            #First without taking any rented back
-            for freq_option in self.assignedFrequencies:
-                if self.try_freq(freq_option, False):
-                    self.is_broadcasting = True
-                    print(f"{self.id} has begun broadcasting on {freq_option}")
-                    freq_option.assignedTo = self
-                    freq_option.is_active = True
-                    return
-                
-            #Next with taking one back if we can
-            for freq_option in self.assignedFrequencies:
-                if self.try_freq(freq_option, True):
-                    self.is_broadcasting = True
-                    print(f"{self.id} has begun broadcasting on {freq_option}")
-                    freq_option.assignedTo = self
-                    freq_option.is_active = True
-                    return
-                
-            print("No frequencies available to begin broadcasting.")
+        if self.try_freq(self.assignedFrequency):
+            self.is_broadcasting = True
+            print(f"{self.id} has begun broadcasting on {self.assignedFrequency}")
+            self.assignedFrequency.assignedTo = self
+            self.assignedFrequency.is_active = True
         else:
-            if self.try_freq(freq):
-                self.is_broadcasting = True
-                print(f"{self.id} has begun broadcasting on {freq}")
-                freq.assignedTo = self
-                freq.is_active = True
-            
+            print("Assigned frequency unavailable to begin broadcasting.")
         
     def try_freq(self, freq, steal=True):
-        #If there is a specified freq, check to see if the requested frequency has been rented out
+        #Check to see if the requested frequency has been rented out
         #    If it is and isn't being used, take it back
         #    If it is and is being used, we can't take it
 
-        index = self.assignedFrequencies.index(freq)
-        if not self.has_rented_frequencies[index]:
+        if not self.has_rented_frequency:
             return True
         else:
             if steal:
@@ -148,15 +127,16 @@ class AuthorizedUser(_UserBase):
                     return False
                 else:
                     print(f"{self.id} has rented out this frequency but it is not being used, so we'll take it back.")
-                    self.revoke_frequency(freq, freq.assignedTo)
+                    self.revoke_frequency(freq.assignedTo)
                     return True
             else:
                 print(f"{self.id} has rented out this frequency and it is being used, checking other options")
             
     
     def stop_broadcasting(self):
-        #TODO: implement this
-        print("We should stop this...")
+        print(f"{self.id} has stopped broadcasting on {self.assignedFrequency}")
+        self.is_broadcasting = False
+        self.assignedFrequency.is_active = False
 
     def __str__(self):
         return f"[Authorized User {self.id}]"
