@@ -34,24 +34,27 @@ def calvin_tests():
 #calvin_tests()
 
 def emma_tests():
+
+    sim = Simulation()
+
     print("Creating 3 radio frequencies")
-    freq1 = RadioFrequency(1, 107.9)
-    freq2 = RadioFrequency(2, 103.5)
-    freq3 = RadioFrequency(3, 99.9)
+    freq1 = RadioFrequency(sim, 1, 107.9)
+    freq2 = RadioFrequency(sim, 2, 103.5)
+    freq3 = RadioFrequency(sim, 3, 99.9)
     print(freq1, freq2, freq3)
     print("\nCreating a radio spectrum out of the frequencies")
-    spectrum = RadioFrequencySpectrum(freq1, freq2, freq3)
+    spectrum = RadioFrequencySpectrum(sim, freq1, freq2, freq3)
 
     print("\nCreating a cognitive user")
-    cog = CognitiveUser(1, 3, 4)
+    cog = CognitiveUser(sim, 3, 4)
     print(cog, f"located at {cog.position}")
 
     print("\nCreating a cognitive user")
-    other_cog = CognitiveUser(3, 5, 12)
-    print(cog, f"located at {cog.position}")
+    other_cog = CognitiveUser(sim, 5, 12)
+    print(other_cog, f"located at {cog.position}")
 
     print("\nCreating an authorized user")
-    auth = AuthorizedUser(2, 2, 2, freq3)
+    auth = AuthorizedUser(sim, 2, 2, freq3)
     print(auth, f"located at {auth.position}")
 
     #Authorized users have dedicated frequencies and can “rent” them out to cognitive users when they are not using them
@@ -70,8 +73,5 @@ def emma_tests():
     #We can look at the rf spectrum and see who is using what at any given time 
          #(including which authorized users are renting to which cognitive users)
     display_sim_state(spectrum, [auth], [cog, other_cog])
-
-    #Multiple users can broadcast on the same frequency if they are further apart than a defined constant distance in real space
-
 
 emma_tests()

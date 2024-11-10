@@ -1,6 +1,17 @@
 TRANSMIT_DISTANCE = 3 #the max distance from a user that radio transmissions can still be picked up
 #COLORS = [Fore.RED, Fore.GREEN, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.YELLOW]
 
+class Simulation:
+    def __init__(self):
+        self.user_ids = []
+
+    def next_user_id(self):
+        new_id = len(self.user_ids)
+        print(f"New user id! {new_id}")
+        self.user_ids.append(new_id)
+        return new_id
+
+
 def display_sim_state(spectrum, auth_users, cog_users):
     #TODO: add colors
 

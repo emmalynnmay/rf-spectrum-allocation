@@ -1,4 +1,5 @@
 from .frequencies import *
+from ..system import *
 
 import abc
 import math
@@ -7,10 +8,11 @@ class _UserBase(abc.ABC):
     """`
     An abstract class to encompass the similarities of both cognitive and authorized users.
     """
-    def __init__(self, id, x, y):
+    def __init__(self, sim, x, y):
         if x < 0 or y < 0:
             raise Exception("x & y positions must not be negative.")
-        self.id = id
+        self.sim = sim
+        self.id = self.sim.next_user_id()
         self.posX = x
         self.posY = y
         self.is_broadcasting = False
@@ -35,8 +37,8 @@ class CognitiveUser(_UserBase):
     Represents a cognitive user in the graph system.  A cognitive user, we have defined as
     a device user that can search for available frequency bands on which to communicate.
     """
-    def __init__(self, id, x, y, freq: RadioFrequency=None):
-        super().__init__(id, x, y)
+    def __init__(self, sim: Simulation, x, y, freq: RadioFrequency=None):
+        super().__init__(sim, x, y)
         self.activeFrequency = freq
 
     @property
@@ -78,8 +80,8 @@ class AuthorizedUser(_UserBase):
     users have dedicated frequencies assigned to them, which they are permitted to "lease"
     to other cognitive users when not in use.
     """
-    def __init__(self, id, x, y, assigned_freq: RadioFrequency):
-        super().__init__(id, x, y)
+    def __init__(self, sim: Simulation, x, y, assigned_freq: RadioFrequency):
+        super().__init__(sim, x, y)
         self.assignedFrequency = assigned_freq
         self.has_rented_frequency = False
 
