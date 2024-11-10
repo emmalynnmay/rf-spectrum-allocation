@@ -3,6 +3,7 @@
 from radiograph.agents.coguser import *
 from radiograph.agents.frequencies import *
 from radiograph.system import *
+from data_generation import read_data
 
 def calvin_tests():
     f1 = RadioFrequency(1, 107.9)
@@ -74,4 +75,11 @@ def emma_tests():
          #(including which authorized users are renting to which cognitive users)
     display_sim_state(spectrum, [auth], [cog, other_cog])
 
-emma_tests()
+#emma_tests()
+    
+def test_data_files():
+    sim = Simulation()
+    data = read_data.get_small_dataset(sim)
+    print(data)
+
+test_data_files()

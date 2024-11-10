@@ -4,6 +4,20 @@ Emma Lynn May, Jonah Harmon, & Calvin Riley
 
 ## Usage
 
+Set up the virtual environment
+
+`python3 -m venv my_env`
+
+`source my_env/bin/activate`
+
+Install dependencies
+
+`pip3 install -r requirements.txt`
+
+Deactivate the virtual environment (when you're done)
+
+`deactivate`
+
 Run all the unit tests!
 
 `python3 test.py`
