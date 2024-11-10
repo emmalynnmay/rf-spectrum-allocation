@@ -1,6 +1,6 @@
 import pandas as pd
-from radiograph.agents.coguser import CognitiveUser, AuthorizedUser
-from radiograph.agents.frequencies import RadioFrequency, RadioFrequencySpectrum
+from radiograph.users import CognitiveUser, AuthorizedUser
+from radiograph.frequencies import RadioFrequency, RadioFrequencySpectrum
 
 def load_users_from_csv(file_path):
     return pd.read_csv(file_path)

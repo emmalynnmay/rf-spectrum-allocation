@@ -8,25 +8,25 @@ class RadioFrequency:
         self.id = id
         self.frequency = freq
         if user:
-            self.assignedTo = [user]
+            self.assigned_to = [user]
         else:
-            self.assignedTo = []
+            self.assigned_to = []
         self.is_active = False
     
     def __str__(self):
         return f"[Frequency {self.frequency} ({self.id})]"
     
     def new_user_assigned(self, user):
-        for existing_user in self.assignedTo:
+        for existing_user in self.assigned_to:
             if is_not_out_of_range(user, existing_user):
                 print(f"{user} cannot transmit on this frequency because they are within range of {existing_user}.")
                 return False
-        self.assignedTo.append(user)
+        self.assigned_to.append(user)
         return True
 
     def user_unassigned(self, user):
-        if user in self.assignedTo:
-            self.assignedTo.remove(user)
+        if user in self.assigned_to:
+            self.assigned_to.remove(user)
 
 class RadioFrequencySpectrum:
     """

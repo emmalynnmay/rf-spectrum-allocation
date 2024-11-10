@@ -1,14 +1,15 @@
 import unittest
-from radiograph.agents.coguser import *
-from radiograph.agents.frequencies import *
+from radiograph.users import *
+from radiograph.frequencies import *
 from radiograph.system import *
+from data_generation import read_data
 
 class TestFrequency(unittest.TestCase):
     def test_create_frequency_no_user(self):
         sim = Simulation()
         freq = RadioFrequency(sim, 1, 107.9)
         self.assertEqual(freq.frequency, 107.9)
-        self.assertEqual(freq.assignedTo, [])
+        self.assertEqual(freq.assigned_to, [])
         self.assertEqual(freq.is_active, False)
 
     def test_create_frequency_user(self):
@@ -16,7 +17,7 @@ class TestFrequency(unittest.TestCase):
         cog = CognitiveUser(sim, 3, 4)
         freq = RadioFrequency(sim, 1, 107.9, cog)
         self.assertEqual(freq.frequency, 107.9)
-        self.assertEqual(freq.assignedTo, [cog])
+        self.assertEqual(freq.assigned_to, [cog])
         self.assertEqual(freq.is_active, False)
 
 class TestSpectrum(unittest.TestCase):
@@ -40,15 +41,15 @@ class TestCognitiveUser(unittest.TestCase):
         self.assertEqual(cog.is_broadcasting, False)
 
         self.assertEqual(cog.isActive, False)
-        self.assertEqual(cog.activeFrequency, None)
+        self.assertEqual(cog.active_frequency, None)
 
     def test_assign_frequency(self):
         sim = Simulation()
         freq1 = RadioFrequency(sim, 1, 107.9)
         cog = CognitiveUser(sim, 3, 4)
         cog.set_frequency(freq1)
-        self.assertEqual(freq1.assignedTo, [cog])
-        self.assertEqual(cog.activeFrequency, freq1)
+        self.assertEqual(freq1.assigned_to, [cog])
+        self.assertEqual(cog.active_frequency, freq1)
         self.assertEqual(cog.isActive, True)
 
     def test_broadcast(self):
@@ -64,10 +65,10 @@ class TestCognitiveUser(unittest.TestCase):
         self.assertEqual(cog.is_broadcasting, False)
         cog.begin_broadcasting()
         self.assertEqual(cog.is_broadcasting, True)
-        self.assertEqual(cog.activeFrequency.is_active, True)
+        self.assertEqual(cog.active_frequency.is_active, True)
         cog.stop_broadcasting()
         self.assertEqual(cog.is_broadcasting, False)
-        self.assertEqual(cog.activeFrequency.is_active, False)
+        self.assertEqual(cog.active_frequency.is_active, False)
 
     def test_invalid_pos(self):
         sim = Simulation()
@@ -83,7 +84,7 @@ class TestAuthorizedUser(unittest.TestCase):
         self.assertEqual(auth.is_broadcasting, False)
 
         self.assertEqual(auth.has_rented_frequency, None)
-        self.assertEqual(auth.assignedFrequency, freq1)
+        self.assertEqual(auth.assigned_frequency, freq1)
 
     def test_broadcast(self):
         sim = Simulation()
@@ -92,11 +93,11 @@ class TestAuthorizedUser(unittest.TestCase):
 
         auth.begin_broadcasting()
         self.assertEqual(auth.is_broadcasting, True)
-        self.assertEqual(auth.assignedFrequency.is_active, True)
+        self.assertEqual(auth.assigned_frequency.is_active, True)
 
         auth.stop_broadcasting()
         self.assertEqual(auth.is_broadcasting, False)
-        self.assertEqual(auth.assignedFrequency.is_active, False)
+        self.assertEqual(auth.assigned_frequency.is_active, False)
 
     def test_invalid_pos(self):
         sim = Simulation()
@@ -111,17 +112,17 @@ class TestAuthorizedUser(unittest.TestCase):
         cog = CognitiveUser(sim, 3, 5)
 
         self.assertEqual(cog.isActive, False)
-        self.assertEqual(cog.activeFrequency, None)
+        self.assertEqual(cog.active_frequency, None)
         self.assertEqual(auth.has_rented_frequency, None)
 
         auth.grant_frequency(freq1, cog)
         self.assertEqual(cog.isActive, True)
-        self.assertEqual(cog.activeFrequency, freq1)
+        self.assertEqual(cog.active_frequency, freq1)
         self.assertEqual(auth.has_rented_frequency, cog)
 
         auth.revoke_frequency(cog)
         self.assertEqual(cog.isActive, False)
-        self.assertEqual(cog.activeFrequency, None)
+        self.assertEqual(cog.active_frequency, None)
         self.assertEqual(auth.has_rented_frequency, None)
 
     def test_cant_rent_while_using(self):
@@ -135,7 +136,7 @@ class TestAuthorizedUser(unittest.TestCase):
         with self.assertRaises(Exception):
             auth.grant_frequency(freq1, cog)
         self.assertEqual(cog.isActive, False)
-        self.assertEqual(cog.activeFrequency, None)
+        self.assertEqual(cog.active_frequency, None)
         self.assertEqual(auth.has_rented_frequency, None)
 
     def test_broadcast_with_rented(self):
@@ -146,7 +147,7 @@ class TestAuthorizedUser(unittest.TestCase):
 
         auth.begin_broadcasting()
         self.assertEqual(auth.is_broadcasting, True)
-        self.assertEqual(auth.assignedFrequency.is_active, True)
+        self.assertEqual(auth.assigned_frequency.is_active, True)
         auth.stop_broadcasting()
 
         auth.grant_frequency(freq1, cog)
@@ -155,7 +156,7 @@ class TestAuthorizedUser(unittest.TestCase):
         print(auth)
         auth.begin_broadcasting()
         self.assertEqual(auth.is_broadcasting, True)
-        self.assertEqual(auth.assignedFrequency.is_active, True)
+        self.assertEqual(auth.assigned_frequency.is_active, True)
         auth.stop_broadcasting()
 
         auth.grant_frequency(freq1, cog)
@@ -165,7 +166,7 @@ class TestAuthorizedUser(unittest.TestCase):
         auth.begin_broadcasting()
         self.assertEqual(auth.is_broadcasting, False)
         self.assertEqual(cog.is_broadcasting, True)
-        self.assertEqual(auth.assignedFrequency.is_active, True)
+        self.assertEqual(auth.assigned_frequency.is_active, True)
 
 class TestVisualization(unittest.TestCase):
     def test_standard(self):
@@ -222,6 +223,10 @@ class TestVisualization(unittest.TestCase):
 
         display_sim_state(spectrum, [], [u00])
     
+class TestDataRead(unittest.TestCase):
+    def test_small_data(self):
+        sim = Simulation()
+        data = read_data.get_small_dataset(sim)
 
 class TestMisc(unittest.TestCase):
     def test_users_on_same_freq(self):
@@ -230,15 +235,15 @@ class TestMisc(unittest.TestCase):
         cog1 = CognitiveUser(sim, 0, 0)
         cog1.set_frequency(freq1)
 
-        self.assertIn(cog1, freq1.assignedTo)
-        self.assertEqual(cog1.activeFrequency, freq1)
+        self.assertIn(cog1, freq1.assigned_to)
+        self.assertEqual(cog1.active_frequency, freq1)
         self.assertEqual(cog1.isActive, True)
 
         cog2 = CognitiveUser(sim, 0, 2 + get_transmit_distance())
         cog2.set_frequency(freq1)
-        self.assertEqual(cog2.activeFrequency, freq1)
+        self.assertEqual(cog2.active_frequency, freq1)
         self.assertEqual(cog2.isActive, True)
-        self.assertIn(cog2, freq1.assignedTo)
+        self.assertIn(cog2, freq1.assigned_to)
     
     def test_users_too_close_on_same_freq(self):
         sim = Simulation()
@@ -246,14 +251,14 @@ class TestMisc(unittest.TestCase):
         cog1 = CognitiveUser(sim, 0, 0)
         cog1.set_frequency(freq1)
 
-        self.assertIn(cog1, freq1.assignedTo)
-        self.assertEqual(cog1.activeFrequency, freq1)
+        self.assertIn(cog1, freq1.assigned_to)
+        self.assertEqual(cog1.active_frequency, freq1)
         self.assertEqual(cog1.isActive, True)
 
         cog2 = CognitiveUser(sim, 0, 1) #requires that TRANSMIT_DISTANCE is more than 1, so do that for sure
         cog2.set_frequency(freq1)
-        self.assertNotIn(cog2, freq1.assignedTo)
-        self.assertEqual(cog2.activeFrequency, None)
+        self.assertNotIn(cog2, freq1.assigned_to)
+        self.assertEqual(cog2.active_frequency, None)
         self.assertEqual(cog2.isActive, False)
 
     def test_users_wont_have_same_id(self):

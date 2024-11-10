@@ -21,8 +21,8 @@ def get_transmit_distance():
     return TRANSMIT_DISTANCE
 
 def is_not_out_of_range(user1, user2):
-    x_dist = user1.posX - user2.posX
-    y_dist = user1.posY - user2.posY
+    x_dist = user1.pos_x - user2.pos_x
+    y_dist = user1.pox_y - user2.pox_y
     dist = pow((pow(x_dist, 2) + pow(y_dist, 2)), .5)
     return dist <= TRANSMIT_DISTANCE
 
@@ -35,8 +35,8 @@ def display_sim_state(spectrum, auth_users, cog_users):
     print("\nReal Space (not entirely mathematically accurate):")
 
     # Determine grid size for real space
-    max_x = max(user.posX for user in all_users) + TRANSMIT_DISTANCE
-    max_y = max(user.posY for user in all_users) + TRANSMIT_DISTANCE
+    max_x = max(user.pos_x for user in all_users) + TRANSMIT_DISTANCE
+    max_y = max(user.pox_y for user in all_users) + TRANSMIT_DISTANCE
     grid_size = max(max_x, max_y) + 1
 
     real_space = [[" " for _ in range(grid_size)] for _ in range(grid_size)]
@@ -53,31 +53,31 @@ def display_sim_state(spectrum, auth_users, cog_users):
     for user in all_users:
 
         for dist in range(1, TRANSMIT_DISTANCE + 1):
-            newXPos = user.posX + dist
-            newYPos = user.posY + dist
-            newXNeg = user.posX - dist
-            newYNeg = user.posY - dist
-            if check_in_range(newXPos):
-                plot_range(newXPos, user.posY)
-            if check_in_range(newXNeg):
-                plot_range(newXNeg, user.posY)
-            if check_in_range(newYPos):
-                plot_range(user.posX, newYPos)
-            if check_in_range(newYNeg):
-                plot_range(user.posX, newYNeg)
+            new_x_pos = user.pos_x + dist
+            new_y_pos = user.pox_y + dist
+            new_x_neg = user.pos_x - dist
+            new_y_neg = user.pox_y - dist
+            if check_in_range(new_x_pos):
+                plot_range(new_x_pos, user.pox_y)
+            if check_in_range(new_x_neg):
+                plot_range(new_x_neg, user.pox_y)
+            if check_in_range(new_y_pos):
+                plot_range(user.pos_x, new_y_pos)
+            if check_in_range(new_y_neg):
+                plot_range(user.pos_x, new_y_neg)
 
-            if check_in_range(newYNeg) and check_in_range(newXNeg):
-                plot_range(newXNeg, newYNeg)
-            if check_in_range(newYNeg) and check_in_range(newXPos):
-                plot_range(newXPos, newYNeg)
-            if check_in_range(newYPos) and check_in_range(newXNeg):
-                plot_range(newXNeg, newYPos)
-            if check_in_range(newYPos) and check_in_range(newXPos):
-                plot_range(newXPos, newYPos)
+            if check_in_range(new_y_neg) and check_in_range(new_x_neg):
+                plot_range(new_x_neg, new_y_neg)
+            if check_in_range(new_y_neg) and check_in_range(new_x_pos):
+                plot_range(new_x_pos, new_y_neg)
+            if check_in_range(new_y_pos) and check_in_range(new_x_neg):
+                plot_range(new_x_neg, new_y_pos)
+            if check_in_range(new_y_pos) and check_in_range(new_x_pos):
+                plot_range(new_x_pos, new_y_pos)
 
     for user in all_users:
-        real_space[user.posY][user.posX] = user.id
-        #real_space_colors[user.posX][user.posY] = COLORS[color]
+        real_space[user.pox_y][user.pos_x] = user.id
+        #real_space_colors[user.pos_x][user.pox_y] = COLORS[color]
     
     print_cartesian(real_space)
 
@@ -85,13 +85,13 @@ def display_sim_state(spectrum, auth_users, cog_users):
     print("\nRadio Spectrum:")
     for freq in spectrum.frequencies:
         print(freq.frequency)
-        if len(freq.assignedTo) > 0:
-            for user in freq.assignedTo:
+        if len(freq.assigned_to) > 0:
+            for user in freq.assigned_to:
                 print(f"   - User {user.id} is actively broadcasting")
         else:
             print(f"   - No active broadcast")
         for user in auth_users:
-            if freq == user.assignedFrequency:
+            if freq == user.assigned_frequency:
                 print(f"   - Frequency owned by authorized user {user.id}")
 
 def print_cartesian(input_data):
