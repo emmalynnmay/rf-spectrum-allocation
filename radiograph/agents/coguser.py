@@ -13,6 +13,7 @@ class _UserBase(abc.ABC):
             raise Exception("x & y positions must not be negative.")
         self.sim = sim
         self.id = self.sim.next_user_id()
+        sim.check_pos(x, y)
         self.posX = x
         self.posY = y
         self.is_broadcasting = False
@@ -50,9 +51,11 @@ class CognitiveUser(_UserBase):
 
 
     def set_frequency(self, frequency: RadioFrequency):
-        if not frequency == None:
-            frequency.assignedTo = self
-        self.activeFrequency = frequency
+        if frequency != None:
+            if frequency.new_user_assigned(self):
+                self.activeFrequency = frequency
+        else:
+            self.activeFrequency = frequency
 
     def begin_broadcasting(self):
         if (self.activeFrequency):
@@ -83,7 +86,7 @@ class AuthorizedUser(_UserBase):
     def __init__(self, sim: Simulation, x, y, assigned_freq: RadioFrequency):
         super().__init__(sim, x, y)
         self.assignedFrequency = assigned_freq
-        self.has_rented_frequency = False
+        self.has_rented_frequency = None
 
     def grant_frequency(self, frequency: RadioFrequency, user: CognitiveUser):
         """
@@ -94,12 +97,15 @@ class AuthorizedUser(_UserBase):
             raise Exception("Frequency cannot be rented out when actively being broadcast on.")
         if frequency != self.assignedFrequency:
             raise IndexError(f"{frequency} is not assigned to this authorized user ({self.id})")
+        frequency.user_unassigned(self)
         user.set_frequency(frequency)
-        self.has_rented_frequency = True
+        self.has_rented_frequency = user
 
     def revoke_frequency(self, user: CognitiveUser):
+        the_freq = user.activeFrequency
+        the_freq.user_unassigned(user)
         user.set_frequency(None)
-        self.has_rented_frequency = False
+        self.has_rented_frequency = None
 
     def begin_broadcasting(self):
 
@@ -110,7 +116,7 @@ class AuthorizedUser(_UserBase):
         if self.try_freq(self.assignedFrequency):
             self.is_broadcasting = True
             print(f"{self.id} has begun broadcasting on {self.assignedFrequency}")
-            self.assignedFrequency.assignedTo = self
+            self.assignedFrequency.assignedTo.append(self)
             self.assignedFrequency.is_active = True
         else:
             print("Assigned frequency unavailable to begin broadcasting.")
@@ -129,7 +135,7 @@ class AuthorizedUser(_UserBase):
                     return False
                 else:
                     print(f"{self.id} has rented out this frequency but it is not being used, so we'll take it back.")
-                    self.revoke_frequency(freq.assignedTo)
+                    self.revoke_frequency(self.has_rented_frequency)
                     return True
             else:
                 print(f"{self.id} has rented out this frequency and it is being used, checking other options")

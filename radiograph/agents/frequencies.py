@@ -7,11 +7,26 @@ class RadioFrequency:
     def __init__(self, sim: Simulation, id, freq, user=None):
         self.id = id
         self.frequency = freq
-        self.assignedTo = user
+        if user:
+            self.assignedTo = [user]
+        else:
+            self.assignedTo = []
         self.is_active = False
     
     def __str__(self):
         return f"[Frequency {self.frequency} ({self.id})]"
+    
+    def new_user_assigned(self, user):
+        for existing_user in self.assignedTo:
+            if is_not_out_of_range(user, existing_user):
+                print(f"{user} cannot transmit on this frequency because they are within range of {existing_user}.")
+                return False
+        self.assignedTo.append(user)
+        return True
+
+    def user_unassigned(self, user):
+        if user in self.assignedTo:
+            self.assignedTo.remove(user)
 
 class RadioFrequencySpectrum:
     """

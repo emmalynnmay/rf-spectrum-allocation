@@ -8,7 +8,7 @@ class TestFrequency(unittest.TestCase):
         sim = Simulation()
         freq = RadioFrequency(sim, 1, 107.9)
         self.assertEqual(freq.frequency, 107.9)
-        self.assertEqual(freq.assignedTo, None)
+        self.assertEqual(freq.assignedTo, [])
         self.assertEqual(freq.is_active, False)
 
     def test_create_frequency_user(self):
@@ -16,7 +16,7 @@ class TestFrequency(unittest.TestCase):
         cog = CognitiveUser(sim, 3, 4)
         freq = RadioFrequency(sim, 1, 107.9, cog)
         self.assertEqual(freq.frequency, 107.9)
-        self.assertEqual(freq.assignedTo, cog)
+        self.assertEqual(freq.assignedTo, [cog])
         self.assertEqual(freq.is_active, False)
 
 class TestSpectrum(unittest.TestCase):
@@ -47,12 +47,9 @@ class TestCognitiveUser(unittest.TestCase):
         freq1 = RadioFrequency(sim, 1, 107.9)
         cog = CognitiveUser(sim, 3, 4)
         cog.set_frequency(freq1)
-        self.assertEqual(freq1.assignedTo, cog)
+        self.assertEqual(freq1.assignedTo, [cog])
         self.assertEqual(cog.activeFrequency, freq1)
         self.assertEqual(cog.isActive, True)
-
-    def test_drop_frequency(self):
-        self.assertFalse(True)
 
     def test_broadcast(self):
         sim = Simulation()
@@ -85,7 +82,7 @@ class TestAuthorizedUser(unittest.TestCase):
         self.assertEqual(auth.position, (3, 4))
         self.assertEqual(auth.is_broadcasting, False)
 
-        self.assertEqual(auth.has_rented_frequency, False)
+        self.assertEqual(auth.has_rented_frequency, None)
         self.assertEqual(auth.assignedFrequency, freq1)
 
     def test_broadcast(self):
@@ -111,27 +108,27 @@ class TestAuthorizedUser(unittest.TestCase):
         sim = Simulation()
         freq1 = RadioFrequency(sim, 1, 107.9)
         auth = AuthorizedUser(sim, 3, 4, freq1)
-        cog = CognitiveUser(sim, 3, 4)
+        cog = CognitiveUser(sim, 3, 5)
 
         self.assertEqual(cog.isActive, False)
         self.assertEqual(cog.activeFrequency, None)
-        self.assertEqual(auth.has_rented_frequency, False)
+        self.assertEqual(auth.has_rented_frequency, None)
 
         auth.grant_frequency(freq1, cog)
         self.assertEqual(cog.isActive, True)
         self.assertEqual(cog.activeFrequency, freq1)
-        self.assertEqual(auth.has_rented_frequency, True)
+        self.assertEqual(auth.has_rented_frequency, cog)
 
         auth.revoke_frequency(cog)
         self.assertEqual(cog.isActive, False)
         self.assertEqual(cog.activeFrequency, None)
-        self.assertEqual(auth.has_rented_frequency, False)
+        self.assertEqual(auth.has_rented_frequency, None)
 
     def test_cant_rent_while_using(self):
         sim = Simulation()
         freq1 = RadioFrequency(sim, 1, 107.9)
         auth = AuthorizedUser(sim, 3, 4, freq1)
-        cog = CognitiveUser(sim, 3, 4)
+        cog = CognitiveUser(sim, 3, 5)
 
         auth.begin_broadcasting()
 
@@ -139,13 +136,13 @@ class TestAuthorizedUser(unittest.TestCase):
             auth.grant_frequency(freq1, cog)
         self.assertEqual(cog.isActive, False)
         self.assertEqual(cog.activeFrequency, None)
-        self.assertEqual(auth.has_rented_frequency, False)
+        self.assertEqual(auth.has_rented_frequency, None)
 
     def test_broadcast_with_rented(self):
         sim = Simulation()
         freq1 = RadioFrequency(sim, 1, 107.9)
         auth = AuthorizedUser(sim, 3, 4, freq1)
-        cog = CognitiveUser(sim, 3, 4)
+        cog = CognitiveUser(sim, 3, 5)
 
         auth.begin_broadcasting()
         self.assertEqual(auth.is_broadcasting, True)
@@ -155,6 +152,7 @@ class TestAuthorizedUser(unittest.TestCase):
         auth.grant_frequency(freq1, cog)
 
         # Take back so we can broadcast
+        print(auth)
         auth.begin_broadcasting()
         self.assertEqual(auth.is_broadcasting, True)
         self.assertEqual(auth.assignedFrequency.is_active, True)
@@ -183,22 +181,88 @@ class TestVisualization(unittest.TestCase):
         cog.begin_broadcasting()
 
         display_sim_state(spectrum, [auth], [cog, other_cog])
-        self.assertTrue(False) #FIXME: make sure this works
+
+    def test_coords(self):
+        sim = Simulation()
+        freq1 = RadioFrequency(sim, 1, 107.9)
+        spectrum = RadioFrequencySpectrum(sim, freq1)
+
+        u00 = CognitiveUser(sim, 0, 0)
+
+        # diagonal group
+        # u11 = CognitiveUser(sim, 1, 1)
+        # u22 = CognitiveUser(sim, 2, 2)
+        # u33 = CognitiveUser(sim, 3, 3)
+        # u44 = CognitiveUser(sim, 4, 4)
+
+        # x = 0 group
+        u01 = CognitiveUser(sim, 0, 1)
+        u02 = CognitiveUser(sim, 0, 2)
+        u03 = CognitiveUser(sim, 0, 3)
+        u04 = CognitiveUser(sim, 0, 4)
+
+        # y = 0 group
+        u10 = CognitiveUser(sim, 1, 0)
+        u20 = CognitiveUser(sim, 2, 0)
+        u30 = CognitiveUser(sim, 3, 0)
+        u40 = CognitiveUser(sim, 4, 0)
+
+        display_sim_state(spectrum, [], [u00,
+            # u11, u22, u33, u44, 
+            u01, u02, u03, u04, 
+            u10, u20, u30, u40
+            ])
+
+    def test_range(self):
+        sim = Simulation()
+        freq1 = RadioFrequency(sim, 1, 107.9)
+        spectrum = RadioFrequencySpectrum(sim, freq1)
+
+        u00 = CognitiveUser(sim, 0, 0)
+
+        display_sim_state(spectrum, [], [u00])
+    
 
 class TestMisc(unittest.TestCase):
     def test_users_on_same_freq(self):
-        self.assertTrue(False)
+        sim = Simulation()
+        freq1 = RadioFrequency(sim, 1, 107.9)
+        cog1 = CognitiveUser(sim, 0, 0)
+        cog1.set_frequency(freq1)
+
+        self.assertIn(cog1, freq1.assignedTo)
+        self.assertEqual(cog1.activeFrequency, freq1)
+        self.assertEqual(cog1.isActive, True)
+
+        cog2 = CognitiveUser(sim, 0, 2 + get_transmit_distance())
+        cog2.set_frequency(freq1)
+        self.assertEqual(cog2.activeFrequency, freq1)
+        self.assertEqual(cog2.isActive, True)
+        self.assertIn(cog2, freq1.assignedTo)
     
     def test_users_too_close_on_same_freq(self):
-        self.assertTrue(False)
+        sim = Simulation()
+        freq1 = RadioFrequency(sim, 1, 107.9)
+        cog1 = CognitiveUser(sim, 0, 0)
+        cog1.set_frequency(freq1)
 
-    def users_wont_have_same_id(self):
+        self.assertIn(cog1, freq1.assignedTo)
+        self.assertEqual(cog1.activeFrequency, freq1)
+        self.assertEqual(cog1.isActive, True)
+
+        cog2 = CognitiveUser(sim, 0, 1) #requires that TRANSMIT_DISTANCE is more than 1, so do that for sure
+        cog2.set_frequency(freq1)
+        self.assertNotIn(cog2, freq1.assignedTo)
+        self.assertEqual(cog2.activeFrequency, None)
+        self.assertEqual(cog2.isActive, False)
+
+    def test_users_wont_have_same_id(self):
         sim = Simulation()
         u1 = CognitiveUser(sim, 3, 8)
         u2 = CognitiveUser(sim, 3, 4)
         self.assertNotEqual(u1.id, u2.id)
 
-    def users_cant_be_in_same_pos(self):
+    def test_users_cant_be_in_same_pos(self):
         sim = Simulation()
         u1 = CognitiveUser(sim, 3, 4)
         with self.assertRaises(Exception):
