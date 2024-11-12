@@ -1,23 +1,39 @@
+from radiograph.system import *
+
 class RadioFrequency:
     """
     Represents a radio frequency band for use by different users in the grid.
     """
-    def __init__(self, id, freq, user=None):
+    def __init__(self, sim: Simulation, id, freq, user=None):
         self.id = id
         self.frequency = freq
-        self.assignedTo = user
+        if user:
+            self.assigned_to = [user]
+        else:
+            self.assigned_to = []
+        self.is_active = False
     
     def __str__(self):
         return f"[Frequency {self.frequency} ({self.id})]"
+    
+    def new_user_assigned(self, user):
+        for existing_user in self.assigned_to:
+            if is_not_out_of_range(user, existing_user):
+                print(f"{user} cannot transmit on this frequency because they are within range of {existing_user}.")
+                return False
+        self.assigned_to.append(user)
+        return True
 
-
+    def user_unassigned(self, user):
+        if user in self.assigned_to:
+            self.assigned_to.remove(user)
 
 class RadioFrequencySpectrum:
     """
     Represents a range of frequency bands.  Generally intended for authorized
     users to indicate their assigned bands which they may lease out.
     """
-    def __init__(self, *freqs):
+    def __init__(self, sim: Simulation, *freqs):
         self.frequencies = freqs
 
 
