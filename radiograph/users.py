@@ -8,15 +8,16 @@ class _UserBase(abc.ABC):
     """`
     An abstract class to encompass the similarities of both cognitive and authorized users.
     """
-    def __init__(self, sim, x, y):
+    def __init__(self, sim, x, y, wants_to_broadcast_now=False):
         if x < 0 or y < 0:
             raise Exception("x & y positions must not be negative.")
         self.sim = sim
-        self.id = self.sim.next_user_id()
+        # self.id = f"{self.sim.next_user_id()}"
         sim.check_pos(x, y)
         self.pos_x = x
         self.pox_y = y
         self.is_broadcasting = False
+        self.wants_to_broadcast_now = wants_to_broadcast_now
 
     @property
     def position(self):
@@ -38,8 +39,9 @@ class CognitiveUser(_UserBase):
     Represents a cognitive user in the graph system.  A cognitive user, we have defined as
     a device user that can search for available frequency bands on which to communicate.
     """
-    def __init__(self, sim: Simulation, x, y, freq: RadioFrequency=None):
-        super().__init__(sim, x, y)
+    def __init__(self, sim: Simulation, x, y, wants_to_broadcast_now=False, freq: RadioFrequency=None):
+        super().__init__(sim, x, y, wants_to_broadcast_now)
+        self.id = f"c{self.sim.next_user_id()}"
         self.active_frequency = freq
 
     @property
@@ -81,16 +83,15 @@ class CognitiveUser(_UserBase):
             return 1.0 / len(self.active_frequency.assigned_to)
         return 0.0
 
-
-
 class AuthorizedUser(_UserBase):
     """
     Represents an authorized user in the graph system.  Contra a cognitive user, authorized
     users have dedicated frequencies assigned to them, which they are permitted to "lease"
     to other cognitive users when not in use.
     """
-    def __init__(self, sim: Simulation, x, y, assigned_freq: RadioFrequency):
-        super().__init__(sim, x, y)
+    def __init__(self, sim: Simulation, x, y, assigned_freq: RadioFrequency, wants_to_broadcast_now=False):
+        super().__init__(sim, x, y, wants_to_broadcast_now)
+        self.id = f"a{self.sim.next_user_id()}"
         self.assigned_frequency = assigned_freq
         self.has_rented_frequency = None
 

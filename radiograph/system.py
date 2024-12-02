@@ -1,4 +1,4 @@
-TRANSMIT_DISTANCE = 3 #the max distance from a user that radio transmissions can still be picked up
+TRANSMIT_DISTANCE = 5#3 #the max distance from a user that radio transmissions can still be picked up
 #COLORS = [Fore.RED, Fore.GREEN, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.YELLOW]
 
 class Simulation:
@@ -31,6 +31,14 @@ def display_sim_state(spectrum, auth_users, cog_users):
 
     all_users = auth_users + cog_users
 
+    print("\nUsers:")
+    for user in all_users:
+        print(f" - {user}", end="")
+        if user.wants_to_broadcast_now:
+            print(" wants to broadcast")
+        else:
+            print("")
+
     #Display real space with the ranges of each user
     print("\nReal Space (not entirely mathematically accurate):")
 
@@ -39,7 +47,7 @@ def display_sim_state(spectrum, auth_users, cog_users):
     max_y = max(user.pox_y for user in all_users) + TRANSMIT_DISTANCE
     grid_size = max(max_x, max_y) + 1
 
-    real_space = [[" " for _ in range(grid_size)] for _ in range(grid_size)]
+    real_space = [["  " for _ in range(grid_size)] for _ in range(grid_size)]
 
     real_space[0][0] = "+"
 
@@ -47,7 +55,7 @@ def display_sim_state(spectrum, auth_users, cog_users):
         return val < grid_size and val >= 0
     
     def plot_range(x, y):
-        real_space[y][x] = "."
+        real_space[y][x] = ". "
         #real_space_colors[x][y] = color
 
     for user in all_users:
@@ -97,7 +105,7 @@ def display_sim_state(spectrum, auth_users, cog_users):
 def print_cartesian(input_data):
 
     for row in input_data:
-        print("-", end ="-")
+        print("--", end ="-")
     print("")
 
     for row in reversed(input_data):
@@ -108,5 +116,5 @@ def print_cartesian(input_data):
     
     print("", end ="")
     for row in input_data:
-        print("-", end ="-")
+        print("--", end ="-")
     print("")

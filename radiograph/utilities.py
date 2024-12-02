@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 
-
 def calculate_utility(user, frequencies):
     """
     Calculates the utility of a user based on active frequency and broadcasting status.

@@ -8,6 +8,8 @@ Set up the virtual environment
 
 `python3 -m venv my_env`
 
+Activate the virtual environment
+
 `source my_env/bin/activate`
 
 Install dependencies
