@@ -75,6 +75,12 @@ class CognitiveUser(_UserBase):
         self.is_broadcasting = False
         self.active_frequency.is_active = False
 
+    # This is going to need to be changed to incorporate matrices
+    def calculate_utility(self, frequencies):
+        if self.is_broadcasting and self.active_frequency:
+            return 1.0 / len(self.active_frequency.assigned_to)
+        return 0.0
+
 
 
 class AuthorizedUser(_UserBase):

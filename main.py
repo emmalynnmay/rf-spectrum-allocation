@@ -1,6 +1,6 @@
 #from colorama import Fore, Style
 
-from radiograph import frequencies, system, users
+from radiograph import frequencies, system, users, utilities
 from data_generation import read_data
 
 def calvin_tests():
