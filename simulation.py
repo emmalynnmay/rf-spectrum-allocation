@@ -1,28 +1,49 @@
 
 from radiograph import frequencies, system, users, utilities
 from data_generation import read_data
-from coloring import allocate_with_coloring
+from algorithms.coloring import allocate_with_coloring
 
-def allocate_freqs(spectrum, auths, cogs):
+def allocate_freqs(spectrum, auths, cogs, verbose=True):
     willing_to_rent = []
 
-    print("Authorized users willing to rent out their frequency:")
+    if verbose:
+        print("Authorized users willing to rent out their frequency:")
     for auth in auths:
         if not auth.wants_to_broadcast_now:
-            print(f" - {auth}")
+            if verbose:
+                print(f" - {auth}")
             willing_to_rent.append(auth)
         else:
-            auth.begin_broadcasting()
+            auth.begin_broadcasting(False)
 
     want_to_rent = []
-    print("Cognitive users who want to rent a frequency:")
+    if verbose:
+        print("Cognitive users who want to rent a frequency:")
     for cog in cogs:
         if cog.wants_to_broadcast_now:
-            print(f" - {cog}")
+            if verbose:
+                print(f" - {cog}")
             want_to_rent.append(cog)
-    print("")
+    if verbose:
+        print("")
 
-    allocate_with_coloring(willing_to_rent, want_to_rent)
+    allocate_with_coloring(willing_to_rent, want_to_rent, verbose)
+
+def evaluate_allocation(users, frequencies):
+    print("\n\n-- Allocation Evaluation --")
+    print("\nUtilities:")
+    util_sum = 0
+    for user in users:
+        util = utilities.calculate_utility(user, frequencies)
+        print(f" - {user}: {util}")
+        util_sum += util
+    print(f" Social Welfare: {round(util_sum, 3)}")
+    
+    print(f"\nIs in Nash Equilibrium? {utilities.is_nash_equilibrium(users, frequencies)}")
+
+    #TODO: check pareto optimality
+
+    #TODO: plot utility graph
 
 def try_it():
 
@@ -36,6 +57,8 @@ def try_it():
     # freq5 = frequencies.RadioFrequency(sim, 5, 105.5)
     # freq6 = frequencies.RadioFrequency(sim, 6, 106.6)
     # freq7 = frequencies.RadioFrequency(sim, 7, 107.7)
+
+    freqs = [freq0, freq1, freq2]#, freq3, freq4, freq5, freq6, freq7]
 
     spectrum = frequencies.RadioFrequencySpectrum(sim, freq0, freq1, freq2)#, freq3, freq4, freq5, freq6, freq7)
 
@@ -62,4 +85,8 @@ def try_it():
 
     system.display_sim_state(spectrum, auths, cogs)
 
-try_it()
+    evaluate_allocation(cogs, freqs)
+
+if __name__ == '__main__':
+    try_it()
+

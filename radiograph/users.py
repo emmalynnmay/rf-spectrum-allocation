@@ -52,18 +52,19 @@ class CognitiveUser(_UserBase):
         return self.active_frequency is not None
 
 
-    def set_frequency(self, frequency: RadioFrequency):
+    def set_frequency(self, frequency: RadioFrequency, verbose=True):
         if frequency != None:
-            if frequency.new_user_assigned(self):
+            if frequency.new_user_assigned(self, verbose):
                 self.active_frequency = frequency
         else:
             self.active_frequency = frequency
 
-    def begin_broadcasting(self):
+    def begin_broadcasting(self, verbose=True):
         if (self.active_frequency):
             self.is_broadcasting = True
             self.active_frequency.is_active = True
-            print(f"{self.id} has begun broadcasting on {self.active_frequency}")
+            if verbose:
+                print(f"{self.id} has begun broadcasting on {self.active_frequency}")
         else:
             raise Exception(f"{self.id} cannot begin broadcasting because it has no assigned frequency")
 
@@ -114,19 +115,22 @@ class AuthorizedUser(_UserBase):
         user.set_frequency(None)
         self.has_rented_frequency = None
 
-    def begin_broadcasting(self):
+    def begin_broadcasting(self, verbose=True):
 
         if self.is_broadcasting:
-            print(f"{self.id} is already broadcasting...")
+            if verbose:
+                print(f"{self.id} is already broadcasting...")
             return
         
         if self.try_freq(self.assigned_frequency):
             self.is_broadcasting = True
-            print(f"{self.id} has begun broadcasting on {self.assigned_frequency}")
+            if verbose:
+                print(f"{self.id} has begun broadcasting on {self.assigned_frequency}")
             self.assigned_frequency.assigned_to.append(self)
             self.assigned_frequency.is_active = True
         else:
-            print("Assigned frequency unavailable to begin broadcasting.")
+            if verbose:
+                print("Assigned frequency unavailable to begin broadcasting.")
         
     def try_freq(self, freq, steal=True):
         #Check to see if the requested frequency has been rented out
