@@ -1,15 +1,16 @@
 from radiograph.system import is_not_out_of_range
 
-def addEdge(adj, v, w):
-     
+def add_edge(adj, v, w):
     if w not in adj[v]:
         adj[v].append(w)
     if v not in adj[w]:
         adj[w].append(v)  
     return adj
  
+#Time Complexity: O(V^2 + E), in worst case.
+#https://www.geeksforgeeks.org/graph-coloring-set-2-greedy-algorithm/
 # Assigns colors (starting from 0) to all vertices and prints the assignment of colors
-def greedyColoring(adj, V):
+def find_coloring(adj, V):
      
     result = [-1] * V
  
@@ -54,19 +55,42 @@ def allocate_with_coloring(colors, vertices, verbose):
             if vertices[vert_index] == vertices[potential_neighbor_index]:
                 continue
             if is_not_out_of_range(vertices[vert_index], vertices[potential_neighbor_index]):
-                graph = addEdge(graph, vert_index, potential_neighbor_index)
+                graph = add_edge(graph, vert_index, potential_neighbor_index)
 
-    (V, result) = greedyColoring(graph, len(vertices))
+    (V, result) = find_coloring(graph, len(vertices))
+
+    num_colors_needed = max(result) + 1
+
+    verts_by_color_index = [[] for _ in range(num_colors_needed)]
+    num_of_verts_by_color_index = [0] * num_colors_needed
+
+    if verbose:
+        print("Proposed Coloring:")
     for u in range(V):
-        if result[u] >= len(colors):
-            if verbose:
-                print("Vertex", vertices[u], " -> No colors left, cannot be broadcast :(")
-            continue
-        if verbose:
-            print("Vertex", vertices[u], " -> Color", colors[result[u]].assigned_frequency, f"({colors[result[u]]})")
-        colors[result[u]].grant_frequency(colors[result[u]].assigned_frequency, vertices[u])
-        vertices[u].begin_broadcasting()
+        print(" Vertex", vertices[u], f" -> Color: {result[u]}")
+        verts_by_color_index[result[u]].append(vertices[u])
+        num_of_verts_by_color_index[result[u]] += 1
 
-#Time Complexity: O(V^2 + E), in worst case.
-#Auxiliary Space: O(1), as we are not using any extra space.
-#https://www.geeksforgeeks.org/graph-coloring-set-2-greedy-algorithm/
+    if verbose:
+        print("Real Coloring:")
+    for color_we_have in colors:    
+        #Let's assign the next color_we_have to the color_index that has been assigned to the most vertices
+        max_number = max(num_of_verts_by_color_index)
+        color_index = num_of_verts_by_color_index.index(max_number)
+
+        if color_index == -1:
+            #We have successfully assigned all needed colors
+            break
+
+        #Remove from the running for the next iterations of the loop
+        num_of_verts_by_color_index[color_index] = -1
+
+        for vertex in verts_by_color_index[color_index]:
+            if verbose:
+                print(" Vertex", vertex, " -> Color", color_we_have.assigned_frequency, f"({color_we_have})")
+            color_we_have.grant_frequency(color_we_have.assigned_frequency, vertex)
+            vertex.begin_broadcasting()
+
+    for leftover_color_index in range(len(num_of_verts_by_color_index)):
+        if num_of_verts_by_color_index[leftover_color_index] != -1 and verbose:
+            print(f" Not enough colors to cover color {leftover_color_index}. {len(verts_by_color_index[leftover_color_index])} vertices left uncolored.")

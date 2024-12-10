@@ -33,3 +33,6 @@ Run a specific unit test!
     * Also fill in with your brain the space in between the dot lines
 * Two users cannot be in the exact same position
 * Users cannot have negative x/y coordinates
+
+## References
+* Coloring algorithm: https://www.geeksforgeeks.org/graph-coloring-set-2-greedy-algorithm/

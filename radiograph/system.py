@@ -36,7 +36,6 @@ def is_not_out_of_range(user1, user2, rangef=TRANSMIT_DISTANCE):
 
 def display_sim_state(spectrum, auth_users, cog_users):
     print(print("\n\n-- System State --"))
-    #TODO: add colors
 
     all_users = auth_users + cog_users
 
