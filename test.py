@@ -2,6 +2,7 @@ import unittest
 from radiograph.users import *
 from radiograph.frequencies import *
 from radiograph.system import *
+from simulation import allocate_freqs
 from data_generation import read_data
 
 class TestFrequency(unittest.TestCase):
@@ -272,7 +273,93 @@ class TestMisc(unittest.TestCase):
         u1 = CognitiveUser(sim, 3, 4)
         with self.assertRaises(Exception):
             u2 = CognitiveUser(sim, 3, 4)
+
+class TestFrequencyAllocation(unittest.TestCase):
+    def test_cogs_want_broadcast_happy(self):
+        sim = Simulation()
+        freq0 = RadioFrequency(sim, 0, 100.0)
+        freq1 = RadioFrequency(sim, 1, 101.1)
+        freq2 = RadioFrequency(sim, 2, 102.2)
+        spectrum = RadioFrequencySpectrum(sim, freq0, freq1, freq2)
+        auth0 = AuthorizedUser(sim, 2, 2, freq0, False)
+        auth1 = AuthorizedUser(sim, 3, 3, freq1, False)
+        auth2 = AuthorizedUser(sim, 5, 2, freq2, False)
+        auths = [auth0, auth1, auth2]
+        cog0 = CognitiveUser(sim, 3, 4, True)
+        cog1 = CognitiveUser(sim, 2, 5, True)
+        cog2 = CognitiveUser(sim, 4, 9, True)
+        cog4 = CognitiveUser(sim, 9, 2, True)
+        cogs = [cog0, cog1, cog2, cog4]
+
+        allocate_freqs(spectrum, auths, cogs, False)
+
+        for cog in cogs:
+            self.assertEqual(cog.is_broadcasting, True) 
     
+    def test_cogs_and_auths_want_broadcast_happy(self):
+        sim = Simulation()
+        freq0 = RadioFrequency(sim, 0, 100.0)
+        freq1 = RadioFrequency(sim, 1, 101.1)
+        freq2 = RadioFrequency(sim, 2, 102.2)
+        spectrum = RadioFrequencySpectrum(sim, freq0, freq1, freq2)
+        auth0 = AuthorizedUser(sim, 2, 2, freq0, False)
+        auth1 = AuthorizedUser(sim, 3, 3, freq1, True)
+        auth2 = AuthorizedUser(sim, 5, 2, freq2, False)
+        auths = [auth0, auth1, auth2]
+        cog0 = CognitiveUser(sim, 3, 4, True)
+        cog1 = CognitiveUser(sim, 2, 5, True)
+        cog2 = CognitiveUser(sim, 4, 9, True)
+        cog4 = CognitiveUser(sim, 9, 2, True)
+        cogs = [cog0, cog1, cog2, cog4]
+
+        allocate_freqs(spectrum, auths, cogs, False)
+
+        for cog in cogs:
+            self.assertEqual(cog.is_broadcasting, True) 
+        self.assertEqual(auth1.is_broadcasting, True)     
+        
+    def test_cogs_want_broadcast_sad(self):
+        sim = Simulation()
+        freq0 = RadioFrequency(sim, 0, 100.0)
+        freq1 = RadioFrequency(sim, 1, 101.1)
+        freq2 = RadioFrequency(sim, 2, 102.2)
+        spectrum = RadioFrequencySpectrum(sim, freq0, freq1, freq2)
+        auth0 = AuthorizedUser(sim, 2, 2, freq0, False)
+        auths = [auth0]
+        cog0 = CognitiveUser(sim, 3, 4, True)
+        cog1 = CognitiveUser(sim, 2, 5, True)
+        cog2 = CognitiveUser(sim, 4, 9, True)
+        cog4 = CognitiveUser(sim, 9, 2, True)
+        cogs = [cog0, cog1, cog2, cog4]
+
+        allocate_freqs(spectrum, auths, cogs, False)
+
+        self.assertEqual(cog0.is_broadcasting, True)  
+        self.assertEqual(cog1.is_broadcasting, False)
+        self.assertEqual(cog2.is_broadcasting, True)
+        self.assertEqual(cog4.is_broadcasting, True)
+    
+    def test_cogs_and_auths_want_broadcast_sad(self):
+        sim = Simulation()
+        freq0 = RadioFrequency(sim, 0, 100.0)
+        freq1 = RadioFrequency(sim, 1, 101.1)
+        freq2 = RadioFrequency(sim, 2, 102.2)
+        spectrum = RadioFrequencySpectrum(sim, freq0, freq1, freq2)
+        auth0 = AuthorizedUser(sim, 2, 2, freq0, False)
+        auth1 = AuthorizedUser(sim, 3, 3, freq1, True)
+        auths = [auth0, auth1]
+        cog0 = CognitiveUser(sim, 3, 4, True)
+        cog1 = CognitiveUser(sim, 2, 5, True)
+        cog2 = CognitiveUser(sim, 4, 9, True)
+        cog4 = CognitiveUser(sim, 9, 2, True)
+        cogs = [cog0, cog1, cog2, cog4]
+
+        allocate_freqs(spectrum, auths, cogs, False)
+
+        self.assertEqual(cog0.is_broadcasting, True)  
+        self.assertEqual(cog1.is_broadcasting, False)
+        self.assertEqual(cog2.is_broadcasting, True)
+        self.assertEqual(cog4.is_broadcasting, True)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 
-
 def calculate_utility(user, frequencies):
     """
     Calculates the utility of a user based on active frequency and broadcasting status.
@@ -9,7 +8,7 @@ def calculate_utility(user, frequencies):
     if user.is_broadcasting and user.active_frequency:
         # Sample utility calculation: based on frequency and distance to avoid interference
         # Adjust based on actual simulation parameters
-        return 1.0 / len(user.active_frequency.assigned_to)  # Example: inverse of number of users sharing frequency
+        return round(1.0 / len(user.active_frequency.assigned_to), 3)  # Example: inverse of number of users sharing frequency
     else:
         return 0.0  # No utility if not broadcasting
 
@@ -23,12 +22,16 @@ def is_nash_equilibrium(users, frequencies):
         # Test each alternative frequency for improvement in utility
         for frequency in frequencies:
             original_frequency = user.active_frequency
-            user.set_frequency(frequency)
+            is_potential_option = user.set_frequency(frequency, False)
+            if not is_potential_option:
+                # If this is not a possible solution, revert and continue to the next one
+                user.set_frequency(original_frequency, False)
+                continue
             if calculate_utility(user, frequencies) > current_utility:
                 # If utility improves, revert and return False (not Nash equilibrium)
-                user.set_frequency(original_frequency)
+                user.set_frequency(original_frequency, False)
                 return False
-            user.set_frequency(original_frequency)  # Revert to original
+            user.set_frequency(original_frequency, False)  # Revert to original
     return True
 
 

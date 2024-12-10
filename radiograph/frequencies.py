@@ -16,10 +16,11 @@ class RadioFrequency:
     def __str__(self):
         return f"[Frequency {self.frequency} ({self.id})]"
     
-    def new_user_assigned(self, user):
+    def new_user_assigned(self, user, verbose=True):
         for existing_user in self.assigned_to:
             if is_not_out_of_range(user, existing_user):
-                print(f"{user} cannot transmit on this frequency because they are within range of {existing_user}.")
+                if verbose:
+                    print(f"{user} cannot transmit on this frequency because they are within range of {existing_user}.")
                 return False
         self.assigned_to.append(user)
         return True
