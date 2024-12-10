@@ -35,7 +35,11 @@ def display_sim_state(spectrum, auth_users, cog_users):
     for user in all_users:
         print(f" - {user}", end="")
         if user.wants_to_broadcast_now:
-            print(" wants to broadcast")
+            if user.is_broadcasting:
+                emoji = "✅"
+            else:
+                emoji = "❌"
+            print(f" wants to broadcast {emoji}")
         else:
             print("")
 

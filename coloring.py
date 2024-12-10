@@ -53,7 +53,7 @@ def greedyColoring(adj, V):
  
 def allocate_with_coloring(colors, vertices):
 
-    graph = [[] for i in range(len(vertices))]
+    graph = [[] for _ in range(len(vertices))]
     
     for vert_index in range(len(vertices)):
         for potential_neighbor_index in range(len(vertices)):
@@ -65,6 +65,9 @@ def allocate_with_coloring(colors, vertices):
     #print(graph)
     (V, result) = greedyColoring(graph, len(vertices))
     for u in range(V):
+        if result[u] >= len(colors):
+            print("Vertex", vertices[u], " -> No colors left, cannot be broadcast :(")
+            continue
         print("Vertex", vertices[u], " -> Color", colors[result[u]].assigned_frequency, f"({colors[result[u]]})")
         colors[result[u]].grant_frequency(colors[result[u]].assigned_frequency, vertices[u])
         vertices[u].begin_broadcasting()
@@ -81,7 +84,6 @@ if __name__ == '__main__':
     g1 = addEdge(g1, 3, 4)
     print("Coloring of graph 1 ")
     greedyColoring(g1, 5)
-
 
 #Time Complexity: O(V^2 + E), in worst case.
 #Auxiliary Space: O(1), as we are not using any extra space.

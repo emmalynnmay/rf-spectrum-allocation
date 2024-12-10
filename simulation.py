@@ -40,20 +40,20 @@ def try_it():
     spectrum = frequencies.RadioFrequencySpectrum(sim, freq0, freq1, freq2)#, freq3, freq4, freq5, freq6, freq7)
 
     auth0 = users.AuthorizedUser(sim, 2, 2, freq0, False)
-    auth1 = users.AuthorizedUser(sim, 3, 3, freq1, False)
-    # auth2 = users.AuthorizedUser(sim, 5, 2, freq2)
+    auth1 = users.AuthorizedUser(sim, 3, 3, freq1, True)
+    auth2 = users.AuthorizedUser(sim, 5, 2, freq2, False)
     # auth3 = users.AuthorizedUser(sim, 6, 4, freq3)
     # auth4 = users.AuthorizedUser(sim, 1, 5, freq4)
 
-    auths = [auth0, auth1]#, auth2, auth3, auth4]
+    auths = [auth0, auth1, auth2]#, auth3, auth4]
 
     cog0 = users.CognitiveUser(sim, 3, 4, True)
-    cog1 = users.CognitiveUser(sim, 2, 8, True)
+    cog1 = users.CognitiveUser(sim, 2, 5, True)
     cog2 = users.CognitiveUser(sim, 4, 9, True)
     cog3 = users.CognitiveUser(sim, 1, 1, True)
     cog4 = users.CognitiveUser(sim, 9, 2, True)
 
-    cogs = [cog0, cog1, cog4]#, cog2, cog3, cog4]
+    cogs = [cog0, cog1, cog2, cog3, cog4]
 
     system.display_sim_state(spectrum, auths, cogs)
     print("")
