@@ -67,7 +67,8 @@ def allocate_with_coloring(colors, vertices, verbose):
     if verbose:
         print("Proposed Coloring:")
     for u in range(V):
-        print(" Vertex", vertices[u], f" -> Color: {result[u]}")
+        if verbose:
+            print(" Vertex", vertices[u], f" -> Color: {result[u]}")
         verts_by_color_index[result[u]].append(vertices[u])
         num_of_verts_by_color_index[result[u]] += 1
 
@@ -89,7 +90,7 @@ def allocate_with_coloring(colors, vertices, verbose):
             if verbose:
                 print(" Vertex", vertex, " -> Color", color_we_have.assigned_frequency, f"({color_we_have})")
             color_we_have.grant_frequency(color_we_have.assigned_frequency, vertex)
-            vertex.begin_broadcasting()
+            vertex.begin_broadcasting(False)
 
     for leftover_color_index in range(len(num_of_verts_by_color_index)):
         if num_of_verts_by_color_index[leftover_color_index] != -1 and verbose:

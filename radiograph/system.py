@@ -1,7 +1,6 @@
 from math import sqrt
 
-TRANSMIT_DISTANCE = 25#3 #the max distance from a user that radio transmissions can still be picked up
-#COLORS = [Fore.RED, Fore.GREEN, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.YELLOW]
+TRANSMIT_DISTANCE = 25#5 #the max distance from a user that radio transmissions can still be picked up
 
 class Simulation:
     def __init__(self):
@@ -35,7 +34,7 @@ def is_not_out_of_range(user1, user2, rangef=TRANSMIT_DISTANCE):
 
 
 def display_sim_state(spectrum, auth_users, cog_users):
-    print(print("\n\n-- System State --"))
+    print("\n\n-- System State --")
 
     all_users = auth_users + cog_users
 
@@ -68,7 +67,6 @@ def display_sim_state(spectrum, auth_users, cog_users):
     
     def plot_range(x, y):
         real_space[y][x] = ". "
-        #real_space_colors[x][y] = color
 
     for user in all_users:
 
@@ -97,7 +95,6 @@ def display_sim_state(spectrum, auth_users, cog_users):
 
     for user in all_users:
         real_space[user.pox_y][user.pos_x] = user.id
-        #real_space_colors[user.pos_x][user.pox_y] = COLORS[color]
     
     print_cartesian(real_space)
 

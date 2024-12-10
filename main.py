@@ -1,83 +1,62 @@
-#from colorama import Fore, Style
+from radiograph import frequencies, system, users
+from simulation import allocate_freqs, evaluate_allocation
+import random
 
-from radiograph import frequencies, system, users, utilities
-from data_generation import read_data
-
-def calvin_tests():
-    f1 = frequencies.RadioFrequency(1, 107.9)
-    f2 = frequencies.RadioFrequency(2, 103.5)
-    f3 = frequencies.RadioFrequency(3, 99.9)
-    print(f1)
-    print(f2)
-    print(f3)
-
-    sp = frequencies.RadioFrequencySpectrum(f1, f2, f3)
-    c = users.CognitiveUser(1, -3, 4)
-    print(c, f"located at {c.position}")
-    a = users.AuthorizedUser(2, 2, -2, sp)
-    print(a, f"located at {a.position}")
-    c.set_frequency(f1)
-    print(c)
-    a.grant_frequency(f3, c)
-    print(c)
-
-    f4 = users.RadioFrequency(4, 87.9)
-    assert c.activeFrequency is f3
-    try:
-        a.grant_frequency(f4, c)
-    except IndexError:
-        print("Good!  This call was SUPPOSED to fail.")
-    else:
-        raise IndexError("Something's wrong, I can feel it!")
-    
-#calvin_tests()
-
-def emma_tests():
-
+def setup(): 
     sim = system.Simulation()
 
-    print("Creating 3 radio frequencies")
-    freq1 = frequencies.RadioFrequency(sim, 1, 107.9)
-    freq2 = frequencies.RadioFrequency(sim, 2, 103.5)
-    freq3 = frequencies.RadioFrequency(sim, 3, 99.9)
-    print(freq1, freq2, freq3)
-    print("\nCreating a radio spectrum out of the frequencies")
-    spectrum = frequencies.RadioFrequencySpectrum(sim, freq1, freq2, freq3)
+    freq0 = frequencies.RadioFrequency(sim, 0, 100.0)
+    freq1 = frequencies.RadioFrequency(sim, 1, 101.1)
+    freq2 = frequencies.RadioFrequency(sim, 2, 102.2)
+    freq3 = frequencies.RadioFrequency(sim, 3, 103.3)
+    freq4 = frequencies.RadioFrequency(sim, 4, 104.4)
 
-    print("\nCreating a cognitive user")
-    cog = users.CognitiveUser(sim, 3, 4)
-    print(cog, f"located at {cog.position}")
+    freqs = [freq0, freq1, freq2, freq3, freq4]
 
-    print("\nCreating a cognitive user")
-    other_cog = users.CognitiveUser(sim, 5, 12)
-    print(other_cog, f"located at {cog.position}")
+    spectrum = frequencies.RadioFrequencySpectrum(sim, freq0, freq1, freq2, freq3, freq4)
 
-    print("\nCreating an authorized user")
-    auth = users.AuthorizedUser(sim, 2, 2, freq3)
-    print(auth, f"located at {auth.position}")
+    auth0 = users.AuthorizedUser(sim, 2, 2, freq0, True)
+    auth1 = users.AuthorizedUser(sim, 5, 2, freq2, False)
+    auth2 = users.AuthorizedUser(sim, 6, 4, freq3, False)
+    auth3 = users.AuthorizedUser(sim, 1, 5, freq4, True)
 
-    #Authorized users have dedicated frequencies and can “rent” them out to cognitive users when they are not using them
-    print(f"\nAuthorized user is renting out {freq3} to {cog}")
-    auth.grant_frequency(freq3, cog)
-    print(cog)
+    auths = [auth0, auth1, auth2, auth3]
 
-    #Users can broadcast on frequencies
-    cog.begin_broadcasting()
-    auth.begin_broadcasting()
+    cog0 = users.CognitiveUser(sim, 3, 4, True)
+    cog1 = users.CognitiveUser(sim, 2, 5, True)
+    cog2 = users.CognitiveUser(sim, 4, 9, True)
+    cog3 = users.CognitiveUser(sim, 1, 1, True)
+    cog4 = users.CognitiveUser(sim, 9, 2, True)
+    cog5 = users.CognitiveUser(sim, 3, 5, True)
 
-    cog.stop_broadcasting()
-    auth.begin_broadcasting()
+    cogs = [cog0, cog1, cog2, cog3, cog4, cog5]
 
-    #We can visualize the state of the simulation easily
-    #We can look at the rf spectrum and see who is using what at any given time 
-         #(including which authorized users are renting to which cognitive users)
-    system.display_sim_state(spectrum, [auth], [cog, other_cog])
+    return (spectrum, freqs, auths, cogs)
 
-emma_tests()
+def run_simulation(verbose, shuffle_order=False):
+    (spectrum, freqs, auths, cogs) = setup()
     
-def test_data_files():
-    sim = system.Simulation()
-    data = read_data.get_small_dataset(sim)
-    print(data)
+    if shuffle_order:
+        random.shuffle(cogs)
 
-test_data_files()
+    if verbose:
+        system.display_sim_state(spectrum, auths, cogs)
+        print("")
+
+    allocate_freqs(spectrum, auths, cogs, verbose)
+
+    if verbose:
+        system.display_sim_state(spectrum, auths, cogs)
+
+    social_welfare = evaluate_allocation(cogs, freqs, verbose)
+    return social_welfare
+
+if __name__ == '__main__':
+    run_simulation(True)
+
+    iterations = 10
+    social_welfare_results = []
+    for i in range(iterations):
+        social_welfare_results.append(run_simulation(False, True))
+
+    print(f"\nSocial welfare in {iterations} different arrangements of same situation:", social_welfare_results)
