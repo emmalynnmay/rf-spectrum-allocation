@@ -1,6 +1,6 @@
 from math import sqrt
 
-TRANSMIT_DISTANCE = 5#3 #the max distance from a user that radio transmissions can still be picked up
+TRANSMIT_DISTANCE = 25#3 #the max distance from a user that radio transmissions can still be picked up
 #COLORS = [Fore.RED, Fore.GREEN, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.YELLOW]
 
 class Simulation:
@@ -32,10 +32,6 @@ def user_distance(user1, user2):
 
 def is_not_out_of_range(user1, user2, rangef=TRANSMIT_DISTANCE):
     return user_distance(user1, user2) <= rangef
-
-
-def distance_utility(distance, rangef):
-    return 101 ** -(distance / rangef) - 1
 
 
 def display_sim_state(spectrum, auth_users, cog_users):
