@@ -1,3 +1,5 @@
+from math import sqrt
+
 TRANSMIT_DISTANCE = 5#3 #the max distance from a user that radio transmissions can still be picked up
 #COLORS = [Fore.RED, Fore.GREEN, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.YELLOW]
 
@@ -17,14 +19,24 @@ class Simulation:
         self.user_ids.append(new_id)
         return new_id
 
+
 def get_transmit_distance():
     return TRANSMIT_DISTANCE
 
-def is_not_out_of_range(user1, user2):
+
+def user_distance(user1, user2):
     x_dist = user1.pos_x - user2.pos_x
     y_dist = user1.pox_y - user2.pox_y
-    dist = pow((pow(x_dist, 2) + pow(y_dist, 2)), .5)
-    return dist <= TRANSMIT_DISTANCE
+    return sqrt((x_dist ** 2) + (y_dist ** 2))
+
+
+def is_not_out_of_range(user1, user2, rangef=TRANSMIT_DISTANCE):
+    return user_distance(user1, user2) <= rangef
+
+
+def distance_utility(distance, rangef):
+    return 101 ** -(distance / rangef) - 1
+
 
 def display_sim_state(spectrum, auth_users, cog_users):
     print(print("\n\n-- System State --"))
