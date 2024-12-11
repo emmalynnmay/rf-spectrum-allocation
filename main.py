@@ -4,24 +4,24 @@ from radiograph import frequencies, system, users, utilities
 from data_generation import read_data
 
 def calvin_tests():
-    f1 = RadioFrequency(1, 107.9)
-    f2 = RadioFrequency(2, 103.5)
-    f3 = RadioFrequency(3, 99.9)
+    f1 = frequencies.RadioFrequency(1, 107.9)
+    f2 = frequencies.RadioFrequency(2, 103.5)
+    f3 = frequencies.RadioFrequency(3, 99.9)
     print(f1)
     print(f2)
     print(f3)
 
-    sp = RadioFrequencySpectrum(f1, f2, f3)
-    c = CognitiveUser(1, -3, 4)
+    sp = frequencies.RadioFrequencySpectrum(f1, f2, f3)
+    c = users.CognitiveUser(1, -3, 4)
     print(c, f"located at {c.position}")
-    a = AuthorizedUser(2, 2, -2, sp)
+    a = users.AuthorizedUser(2, 2, -2, sp)
     print(a, f"located at {a.position}")
     c.set_frequency(f1)
     print(c)
     a.grant_frequency(f3, c)
     print(c)
 
-    f4 = RadioFrequency(4, 87.9)
+    f4 = users.RadioFrequency(4, 87.9)
     assert c.activeFrequency is f3
     try:
         a.grant_frequency(f4, c)

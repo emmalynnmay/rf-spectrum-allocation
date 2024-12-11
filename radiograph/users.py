@@ -107,12 +107,14 @@ class AuthorizedUser(_UserBase):
             raise IndexError(f"{frequency} is not assigned to this authorized user ({self.id})")
         frequency.user_unassigned(self)
         user.set_frequency(frequency)
+        user.renting_from = self
         self.has_rented_frequency = user
 
     def revoke_frequency(self, user: CognitiveUser):
         the_freq = user.active_frequency
         the_freq.user_unassigned(user)
         user.set_frequency(None)
+        user.renting_from = None
         self.has_rented_frequency = None
 
     def begin_broadcasting(self, verbose=True):

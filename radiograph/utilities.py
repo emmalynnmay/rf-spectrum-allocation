@@ -1,17 +1,27 @@
 import matplotlib.pyplot as plt
 
-def calculate_utility(user, frequencies):
+from radiograph.frequencies import RadioFrequency
+from radiograph.users import AuthorizedUser, _UserBase
+from radiograph.system import TRANSMIT_DISTANCE, is_not_out_of_range
+
+
+def distance_utility(distance, rangef=TRANSMIT_DISTANCE):
+    return 101 ** -(distance / rangef) - 1
+
+
+
+def calculate_utility(user: _UserBase, frequencies: list[RadioFrequency], trans_range=TRANSMIT_DISTANCE):
     """
     Calculates the utility of a user based on active frequency and broadcasting status.
     Utility might depend on factors like frequency allocation, interference, and broadcasting status.
     """
-    if user.is_broadcasting and user.active_frequency:
-        # Sample utility calculation: based on frequency and distance to avoid interference
-        # Adjust based on actual simulation parameters
-        return round(1.0 / len(user.active_frequency.assigned_to), 3)  # Example: inverse of number of users sharing frequency
-    else:
-        return 0.0  # No utility if not broadcasting
+    if user.is_broadcasting and getattr(user, 'active_frequency'):
+        otheruser: AuthorizedUser = user.renting_from
+        if otheruser:
+            util = distance_utility(user.distance_from(otheruser), trans_range)
+            return max(util, 0.0)
 
+    return 0.0
 
 def is_nash_equilibrium(users, frequencies):
     """
