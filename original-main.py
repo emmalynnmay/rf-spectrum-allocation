@@ -4,25 +4,26 @@ from radiograph import frequencies, system, users, utilities
 from data_generation import read_data
 
 def calvin_tests():
-    f1 = frequencies.RadioFrequency(1, 107.9)
-    f2 = frequencies.RadioFrequency(2, 103.5)
-    f3 = frequencies.RadioFrequency(3, 99.9)
+    sim = system.Simulation()
+    f1 = frequencies.RadioFrequency(sim, 1, 107.9)
+    f2 = frequencies.RadioFrequency(sim, 2, 103.5)
+    f3 = frequencies.RadioFrequency(sim, 3, 99.9)
     print(f1)
     print(f2)
     print(f3)
 
-    sp = frequencies.RadioFrequencySpectrum(f1, f2, f3)
-    c = users.CognitiveUser(1, -3, 4)
+    sp = frequencies.RadioFrequencySpectrum(sim, f1, f2, f3)
+    c = users.CognitiveUser(sim, 3, 4)
     print(c, f"located at {c.position}")
-    a = users.AuthorizedUser(2, 2, -2, sp)
+    a = users.AuthorizedUser(sim, 2, 2, f3)
     print(a, f"located at {a.position}")
     c.set_frequency(f1)
     print(c)
     a.grant_frequency(f3, c)
     print(c)
 
-    f4 = users.RadioFrequency(4, 87.9)
-    assert c.activeFrequency is f3
+    f4 = users.RadioFrequency(sim, 4, 87.9)
+    assert c.active_frequency is f3
     try:
         a.grant_frequency(f4, c)
     except IndexError:
@@ -30,7 +31,7 @@ def calvin_tests():
     else:
         raise IndexError("Something's wrong, I can feel it!")
     
-#calvin_tests()
+calvin_tests()
 
 def emma_tests():
 
@@ -73,11 +74,11 @@ def emma_tests():
          #(including which authorized users are renting to which cognitive users)
     system.display_sim_state(spectrum, [auth], [cog, other_cog])
 
-emma_tests()
+#emma_tests()
     
 def test_data_files():
     sim = system.Simulation()
     data = read_data.get_small_dataset(sim)
     print(data)
 
-test_data_files()
+#test_data_files()
