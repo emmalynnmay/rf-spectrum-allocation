@@ -9,7 +9,6 @@ def distance_utility(distance, rangef=TRANSMIT_DISTANCE):
     return 101 ** -(distance / rangef) - 1
 
 
-
 def calculate_utility(user: _UserBase, frequencies: list[RadioFrequency], trans_range=TRANSMIT_DISTANCE):
     if user.is_broadcasting and getattr(user, 'active_frequency'):
         # Base utility for broadcasting
@@ -106,75 +105,43 @@ def plot_utility_graph(users, frequencies):
     plt.show()
 
 
-def refined_pareto_frontier(users, frequencies):
-    """
-    Refined Pareto Frontier visualization with corrected line plotting.
-    """
-    # Calculate utilities for all users
+def plot_lots(users, frequencies):
     utilities = [calculate_utility(user, frequencies) for user in users]
-    user_labels = [str(user) for user in users]
-    user_types = ['Authorized' if isinstance(user, AuthorizedUser) else 'Cognitive' for user in users]
 
-    # Identify Pareto-optimal points
-    pareto_indices = []
-    for i, utility in enumerate(utilities):
-        if all(utility >= other for j, other in enumerate(utilities) if j != i):
-            pareto_indices.append(i)
+    # Determine the users in Nash equilibrium
+    nash_indices = [i for i, user in enumerate(users) if is_nash_equilibrium([user], frequencies)]
 
-    # Extract utilities and indices for Pareto points
+    # Identify Pareto optimal points
+    pareto_indices = [
+        i for i, utility in enumerate(utilities)
+        if all(utility >= other for j, other in enumerate(utilities) if j != i)
+    ]
     pareto_utilities = [utilities[i] for i in pareto_indices]
-    pareto_x = pareto_indices  # Keep the original x-coordinates (user indices)
-
-    # Sort Pareto points for proper plotting
-    sorted_pareto = sorted(zip(pareto_x, pareto_utilities), key=lambda x: x[0])
-    pareto_x, pareto_y = zip(*sorted_pareto)
 
     # Plot utilities for all users
-    plt.figure(figsize=(10, 7))
-    plt.scatter(range(len(utilities)), utilities, label='Utilities (All Users)', alpha=0.7, color='blue')
+    plt.figure(figsize=(10, 6))
+    plt.scatter(range(len(utilities)), utilities, label='All Users', color='blue', alpha=0.7)
 
     # Highlight Pareto-optimal utilities
-    plt.scatter(pareto_x, pareto_y, color='red', label='Pareto Optimal', zorder=5)
+    plt.scatter(pareto_indices, pareto_utilities, color='red', label='Pareto Optimal')
+
+    # Highlight users in Nash equilibrium with a different marker (e.g., 'x')
+    plt.scatter(nash_indices, [utilities[i] for i in nash_indices], color='green', label='Nash Equilibrium', marker='x')
 
     # Draw Pareto Frontier Line
-    plt.plot(pareto_x, pareto_y, linestyle='--', color='red', label='Pareto Frontier')
+    pareto_indices, pareto_utilities = zip(*sorted(zip(pareto_indices, pareto_utilities)))
+    plt.plot(pareto_indices, pareto_utilities, linestyle='--', color='red', label='Pareto Frontier')
 
-    # Annotate each point with user labels
-    for i, utility in enumerate(utilities):
-        plt.text(
-            i, utility + 0.02, user_labels[i], fontsize=8, ha='center'
-        )
-
-    # Add indicators for user types (authorized vs. cognitive)
-    authorized_indices = [i for i, u in enumerate(user_types) if u == 'Authorized']
-    cognitive_indices = [i for i, u in enumerate(user_types) if u == 'Cognitive']
-    plt.scatter(
-        authorized_indices,
-        [utilities[i] for i in authorized_indices],
-        label='Authorized Users',
-        color='green',
-        marker='s',
-        alpha=0.7
-    )
-    plt.scatter(
-        cognitive_indices,
-        [utilities[i] for i in cognitive_indices],
-        label='Cognitive Users',
-        color='blue',
-        marker='o',
-        alpha=0.7
-    )
-
-    # Add total social welfare as a horizontal line
+    # Social welfare
     social_welfare = sum(utilities)
     plt.axhline(social_welfare, color='purple', linestyle='-.', label=f'Social Welfare: {social_welfare:.2f}')
 
-    # Enhance plot appearance
-    plt.xlabel('User Index (Sorted by Utility)')
+    # Customize the plot
+    plt.xlabel('User Index')
     plt.ylabel('Utility')
-    plt.title('Refined Pareto Frontier of Spectrum Allocation')
+    plt.title('Pareto Frontier of Spectrum Allocation')
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
 
+    plt.show()

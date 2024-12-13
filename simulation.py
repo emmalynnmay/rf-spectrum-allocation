@@ -1,6 +1,6 @@
 from radiograph import frequencies, system, users, utilities
 from algorithms.coloring import allocate_with_coloring
-from radiograph.utilities import is_pareto_optimal, plot_utility_graph, refined_pareto_frontier
+from radiograph.utilities import is_pareto_optimal, plot_utility_graph, plot_lots
 
 
 def allocate_freqs(spectrum, auths, cogs, verbose=True):
@@ -49,7 +49,7 @@ def evaluate_allocation(users, frequencies, verbose=True):
         print(f"Is Pareto Optimal? {is_pareto_optimal(users, frequencies)}")
 
         plot_utility_graph(users, frequencies)
-        refined_pareto_frontier(users, frequencies)
+        plot_lots(users, frequencies)
 
 
     return round(util_sum, 3)

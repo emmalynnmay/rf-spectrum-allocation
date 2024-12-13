@@ -5,13 +5,9 @@ import random
 
 
 def setup(use_csv=False, dataset="small"):
-    """
-    Setup the simulation with either hardcoded users or dynamically loaded from CSV.
-    """
     sim = system.Simulation()
 
     if use_csv:
-        # Dynamically load users and spectrum from the chosen dataset
         if dataset == "small":
             users_list, spectrum = get_small_dataset(sim)
         elif dataset == "large":
@@ -19,16 +15,13 @@ def setup(use_csv=False, dataset="small"):
         else:
             raise ValueError("Invalid dataset choice: must be 'small' or 'large'.")
 
-        # Separate authorized and cognitive users
         auths = [user for user in users_list if isinstance(user, users.AuthorizedUser)]
         cogs = [user for user in users_list if isinstance(user, users.CognitiveUser)]
 
-        # Extract frequencies from the spectrum
         freqs = spectrum.frequencies
 
     else:
         if dataset == "large":
-            # Hardcoded setup for large dataset
             freq0 = frequencies.RadioFrequency(sim, 0, 100.0)
             freq1 = frequencies.RadioFrequency(sim, 1, 101.1)
             freq2 = frequencies.RadioFrequency(sim, 2, 102.2)
@@ -92,7 +85,6 @@ def setup(use_csv=False, dataset="small"):
             ]
 
         else:
-            # Hardcoded setup for small dataset
             freq0 = frequencies.RadioFrequency(sim, 0, 100.0)
             freq1 = frequencies.RadioFrequency(sim, 1, 101.1)
             freq2 = frequencies.RadioFrequency(sim, 2, 102.2)
@@ -144,17 +136,14 @@ def run_simulation(verbose, shuffle_order=False, use_csv=False, dataset="small")
 
 
 if __name__ == '__main__':
-    # Option to choose between hardcoded and CSV-based setup
     use_csv_input = input("Use CSV for setup? (yes/no): ").strip().lower() == "yes"
-    dataset_choice = "small"  # Default dataset
+    dataset_choice = "small"
 
     if not use_csv_input:
         dataset_choice = input("Choose dataset for hardcoded setup (small/large): ").strip().lower()
 
-    # Run simulation with the chosen setup
     run_simulation(True, use_csv=use_csv_input, dataset=dataset_choice)
 
-    # Run multiple iterations for testing
     iterations = 10
     social_welfare_results = []
     for i in range(iterations):
