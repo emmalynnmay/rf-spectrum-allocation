@@ -82,3 +82,22 @@ def test_data_files():
     print(data)
 
 #test_data_files()
+
+def tiny_setup(transmit_dist):
+    sim = system.Simulation(transmit_dist)
+
+    freq0 = frequencies.RadioFrequency(sim, 0, 100.0)
+
+    spectrum = frequencies.RadioFrequencySpectrum(sim, freq0)
+    freqs = [freq0]
+
+    auths = [
+        users.AuthorizedUser(sim, 2, 2, freq0, False)
+    ]
+
+    cogs = [
+        users.CognitiveUser(sim, 3, 4, True),
+        users.CognitiveUser(sim, 2, 5, True)
+    ]
+
+    return spectrum, freqs, auths, cogs, sim
