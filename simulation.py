@@ -39,7 +39,7 @@ def evaluate_allocation(users, frequencies, verbose=True):
     for user in users:
         util = utilities.calculate_utility(user, frequencies)
         if verbose:
-            print(f" - {user}: {util}")
+            print(f" - {user}: {round(util, 3)}")
         util_sum += util
     if verbose:
         print(f" Social Welfare: {round(util_sum, 3)}")
