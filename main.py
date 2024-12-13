@@ -140,7 +140,7 @@ if __name__ == '__main__':
         transmit_dist = 25
     elif not use_csv_input:
         dataset_choice = input("Choose dataset for hardcoded setup (small/large): ").strip().lower()
-        transmit_dist = 10
+        transmit_dist = 25#10
 
     run_simulation(True, use_csv=use_csv_input, dataset=dataset_choice, transmit_dist=transmit_dist)
 

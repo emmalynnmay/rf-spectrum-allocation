@@ -118,6 +118,8 @@ def plot_lots(users, frequencies, sim):
         if all(utility >= other for j, other in enumerate(utilities) if j != i)
     ]
     pareto_utilities = [utilities[i] for i in pareto_indices]
+    print(pareto_indices)
+    print(pareto_utilities)
 
     # Plot utilities for all users
     plt.figure(figsize=(10, 6))
