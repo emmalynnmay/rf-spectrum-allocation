@@ -4,6 +4,8 @@ Emma Lynn May, Jonah Harmon, & Calvin Riley
 
 ## Usage
 
+### Set Up
+
 Set up the virtual environment
 
 `python3 -m venv my_env`
@@ -20,6 +22,18 @@ Deactivate the virtual environment (when you're done)
 
 `deactivate`
 
+### Running the Simulation
+
+To run the default simulation, run: `python3 main.py`
+
+Input `no` when asked `Use CSV for setup?`.
+
+Input `large` when asked `Choose dataset for hardcoded setup`.
+
+Feel free to experiment with our other test cases by entering other options in the initial input dialog.
+
+### Unit Tests
+
 Run all the unit tests!
 
 `python3 test.py`
@@ -35,4 +49,4 @@ Run a specific unit test!
 * Users cannot have negative x/y coordinates
 
 ## References
-* Coloring algorithm: https://www.geeksforgeeks.org/graph-coloring-set-2-greedy-algorithm/
+* Coloring algorithm basic implementation: https://www.geeksforgeeks.org/graph-coloring-set-2-greedy-algorithm/
