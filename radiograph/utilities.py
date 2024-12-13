@@ -4,8 +4,6 @@ from radiograph.frequencies import RadioFrequency
 from radiograph.users import AuthorizedUser, _UserBase
 from radiograph.system import is_not_out_of_range
 
-DISTANCE_UTILITY_MODIFIER = .25 #Fix for distance from the user renting from was having too much of an impact on utility.
-
 def distance_utility(distance, rangef):
     return 101 ** -(distance / rangef) - 1
 
@@ -19,15 +17,8 @@ def calculate_utility(user: _UserBase, frequencies: list[RadioFrequency], sim):
         num_users_on_freq = len(user.active_frequency.assigned_to)
         sharing_penalty = 1.0 / max(num_users_on_freq, 1)
 
-        # Calculate distance utility if renting from an authorized user
-        renting_user = getattr(user, 'renting_from', None)
-        if renting_user:
-            distance_util = distance_utility(user.distance_from(renting_user), sim.get_transmit_distance())
-        else:
-            distance_util = 0
-
         # Combine utilities
-        utility = (base_utility * sharing_penalty) + (distance_util * DISTANCE_UTILITY_MODIFIER)
+        utility = base_utility * sharing_penalty
         return max(utility, 0.0)
     return 0.0
 

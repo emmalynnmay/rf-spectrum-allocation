@@ -2,7 +2,7 @@ import unittest
 from radiograph.users import *
 from radiograph.frequencies import *
 from radiograph.system import *
-from simulation import allocate_freqs
+from radiograph.simulation import allocate_freqs
 from data_generation import read_data
 
 class TestFrequency(unittest.TestCase):

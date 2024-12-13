@@ -1,7 +1,7 @@
 user_id,user_type,x_position,y_position,assigned_frequency,willing_to_rent,wants_to_broadcast
-a1,Authorized,16,8,3,True,
+a1,Authorized,16,8,3,False,
 a2,Authorized,16,2,7,True,
-a3,Authorized,0,5,9,True,
+a3,Authorized,0,5,9,False,
 c1,Cognitive,19,17,,,True
 c2,Cognitive,20,1,,,True
 c3,Cognitive,0,15,,,True
