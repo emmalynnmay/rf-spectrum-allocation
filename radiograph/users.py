@@ -12,7 +12,6 @@ class _UserBase(abc.ABC):
         if x < 0 or y < 0:
             raise Exception("x & y positions must not be negative.")
         self.sim = sim
-        # self.id = f"{self.sim.next_user_id()}"
         sim.check_pos(x, y)
         self.pos_x = x
         self.pox_y = y
@@ -78,7 +77,6 @@ class CognitiveUser(_UserBase):
         self.is_broadcasting = False
         self.active_frequency.is_active = False
 
-    # This is going to need to be changed to incorporate matrices
     def calculate_utility(self, frequencies):
         if self.is_broadcasting and self.active_frequency:
             return 1.0 / len(self.active_frequency.assigned_to)

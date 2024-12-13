@@ -3,9 +3,8 @@ from simulation import allocate_freqs, evaluate_allocation
 from data_generation.read_data import get_small_dataset, get_large_dataset
 import random
 
-
-def setup(use_csv=False, dataset="small"):
-    sim = system.Simulation()
+def setup(use_csv=False, dataset="small", transmit_dist=5):
+    sim = system.Simulation(transmit_dist)
 
     if use_csv:
         if dataset == "small":
@@ -110,43 +109,44 @@ def setup(use_csv=False, dataset="small"):
                 users.CognitiveUser(sim, 3, 5, True),
             ]
 
-    return spectrum, freqs, auths, cogs
+    return spectrum, freqs, auths, cogs, sim
 
-
-def run_simulation(verbose, shuffle_order=False, use_csv=False, dataset="small"):
+def run_simulation(verbose, shuffle_order=False, use_csv=False, dataset="small", transmit_dist=5):
     """
     Run the simulation with options to use dynamic datasets or hardcoded data.
     """
-    (spectrum, freqs, auths, cogs) = setup(use_csv, dataset)
+    (spectrum, freqs, auths, cogs, sim) = setup(use_csv, dataset, transmit_dist)
 
     if shuffle_order:
         random.shuffle(cogs)
 
     if verbose:
-        system.display_sim_state(spectrum, auths, cogs)
+        system.display_sim_state(spectrum, auths, cogs, sim)
         print("")
 
-    allocate_freqs(spectrum, auths, cogs, verbose)
+    allocate_freqs(spectrum, auths, cogs, sim, verbose)
 
     if verbose:
-        system.display_sim_state(spectrum, auths, cogs)
+        system.display_sim_state(spectrum, auths, cogs, sim)
 
-    social_welfare = evaluate_allocation(cogs, freqs, verbose)
+    social_welfare = evaluate_allocation(cogs, freqs, sim, verbose)
     return social_welfare
 
 
 if __name__ == '__main__':
     use_csv_input = input("Use CSV for setup? (yes/no): ").strip().lower() == "yes"
-    dataset_choice = "small"
-
-    if not use_csv_input:
+    if use_csv_input:
+        dataset_choice = input("Choose dataset for csv setup (small/large): ").strip().lower()
+        transmit_dist = 25
+    elif not use_csv_input:
         dataset_choice = input("Choose dataset for hardcoded setup (small/large): ").strip().lower()
+        transmit_dist = 10
 
-    run_simulation(True, use_csv=use_csv_input, dataset=dataset_choice)
+    run_simulation(True, use_csv=use_csv_input, dataset=dataset_choice, transmit_dist=transmit_dist)
 
     iterations = 10
     social_welfare_results = []
     for i in range(iterations):
-        social_welfare_results.append(run_simulation(False, True, use_csv=use_csv_input, dataset=dataset_choice))
+        social_welfare_results.append(run_simulation(False, True, use_csv=use_csv_input, dataset=dataset_choice, transmit_dist=transmit_dist))
 
     print(f"\nSocial welfare in {iterations} different arrangements of same situation:", social_welfare_results)

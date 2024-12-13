@@ -46,7 +46,7 @@ def find_coloring(adj, V):
 
     return (V, result)
  
-def allocate_with_coloring(colors, vertices, verbose):
+def allocate_with_coloring(colors, vertices, sim, verbose):
 
     graph = [[] for _ in range(len(vertices))]
     
@@ -54,7 +54,7 @@ def allocate_with_coloring(colors, vertices, verbose):
         for potential_neighbor_index in range(len(vertices)):
             if vertices[vert_index] == vertices[potential_neighbor_index]:
                 continue
-            if is_not_out_of_range(vertices[vert_index], vertices[potential_neighbor_index]):
+            if is_not_out_of_range(vertices[vert_index], vertices[potential_neighbor_index], sim):
                 graph = add_edge(graph, vert_index, potential_neighbor_index)
 
     (V, result) = find_coloring(graph, len(vertices))

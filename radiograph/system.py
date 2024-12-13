@@ -1,11 +1,10 @@
 from math import sqrt
 
-TRANSMIT_DISTANCE = 25#5 #the max distance from a user that radio transmissions can still be picked up
-
 class Simulation:
-    def __init__(self):
+    def __init__(self, transmit_dist):
         self.user_ids = []
         self.user_positions = []
+        self.transmit_dist = transmit_dist
 
     def check_pos(self, x, y):
         if (x, y) in self.user_positions:
@@ -19,8 +18,8 @@ class Simulation:
         return new_id
 
 
-def get_transmit_distance():
-    return TRANSMIT_DISTANCE
+    def get_transmit_distance(self):
+        return self.transmit_dist
 
 
 def user_distance(user1, user2):
@@ -29,11 +28,11 @@ def user_distance(user1, user2):
     return sqrt((x_dist ** 2) + (y_dist ** 2))
 
 
-def is_not_out_of_range(user1, user2, rangef=TRANSMIT_DISTANCE):
-    return user_distance(user1, user2) <= rangef
+def is_not_out_of_range(user1, user2, sim):
+    return user_distance(user1, user2) <= sim.get_transmit_distance()
 
 
-def display_sim_state(spectrum, auth_users, cog_users):
+def display_sim_state(spectrum, auth_users, cog_users, sim):
     print("\n\n-- System State --")
 
     all_users = auth_users + cog_users
@@ -54,8 +53,8 @@ def display_sim_state(spectrum, auth_users, cog_users):
     print("\nReal Space (not entirely mathematically accurate):")
 
     # Determine grid size for real space
-    max_x = max(user.pos_x for user in all_users) + TRANSMIT_DISTANCE
-    max_y = max(user.pox_y for user in all_users) + TRANSMIT_DISTANCE
+    max_x = max(user.pos_x for user in all_users) + sim.get_transmit_distance()
+    max_y = max(user.pox_y for user in all_users) + sim.get_transmit_distance()
     grid_size = max(max_x, max_y) + 1
 
     real_space = [["  " for _ in range(grid_size)] for _ in range(grid_size)]
@@ -70,7 +69,7 @@ def display_sim_state(spectrum, auth_users, cog_users):
 
     for user in all_users:
 
-        for dist in range(1, TRANSMIT_DISTANCE + 1):
+        for dist in range(1, sim.get_transmit_distance() + 1):
             new_x_pos = user.pos_x + dist
             new_y_pos = user.pox_y + dist
             new_x_neg = user.pos_x - dist
