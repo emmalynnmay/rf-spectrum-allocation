@@ -9,18 +9,25 @@ def distance_utility(distance, rangef=TRANSMIT_DISTANCE):
     return 101 ** -(distance / rangef) - 1
 
 
-
 def calculate_utility(user: _UserBase, frequencies: list[RadioFrequency], trans_range=TRANSMIT_DISTANCE):
-    """
-    Calculates the utility of a user based on active frequency and broadcasting status.
-    Utility might depend on factors like frequency allocation, interference, and broadcasting status.
-    """
     if user.is_broadcasting and getattr(user, 'active_frequency'):
-        otheruser: AuthorizedUser = user.renting_from
-        if otheruser:
-            util = distance_utility(user.distance_from(otheruser), trans_range)
-            return max(util, 0.0)
+        # Base utility for broadcasting
+        base_utility = 1.0
 
+        # Penalize based on number of users sharing the frequency
+        num_users_on_freq = len(user.active_frequency.assigned_to)
+        sharing_penalty = 1.0 / max(num_users_on_freq, 1)
+
+        # Calculate distance utility if renting from an authorized user
+        renting_user = getattr(user, 'renting_from', None)
+        if renting_user:
+            distance_util = distance_utility(user.distance_from(renting_user), trans_range)
+        else:
+            distance_util = 0
+
+        # Combine utilities
+        utility = base_utility * sharing_penalty + distance_util
+        return max(utility, 0.0)
     return 0.0
 
 def is_nash_equilibrium(users, frequencies):
@@ -45,18 +52,32 @@ def is_nash_equilibrium(users, frequencies):
     return True
 
 
-def is_pareto_optimal(users, frequencies, all_possible_states):
+def is_pareto_optimal(users, frequencies):
     """
-    Determines if the current state is on the Pareto frontier.
+    Determines if the current state of the users is on the Pareto frontier.
+    A state is Pareto optimal if no user can improve their utility without
+    reducing another user's utility.
     """
     current_utilities = [calculate_utility(user, frequencies) for user in users]
-    for other_state in all_possible_states:
-        other_utilities = [calculate_utility(user, other_state) for user in users]
-        # Check if other state dominates the current state
-        better_for_someone = any(o > c for o, c in zip(other_utilities, current_utilities))
-        no_worse_for_others = all(o >= c for o, c in zip(other_utilities, current_utilities))
-        if better_for_someone and no_worse_for_others:
-            return False
+
+    for user in users:
+        for frequency in frequencies:
+            original_frequency = user.active_frequency
+            user.set_frequency(frequency, verbose=False)
+
+            # Calculate new utilities
+            new_utilities = [calculate_utility(u, frequencies) for u in users]
+
+            # Check if any user improves without harming others
+            better_for_someone = any(new > old for new, old in zip(new_utilities, current_utilities))
+            no_worse_for_others = all(new >= old for new, old in zip(new_utilities, current_utilities))
+
+            # Revert to the original state
+            user.set_frequency(original_frequency, verbose=False)
+
+            if better_for_someone and no_worse_for_others:
+                return False  # Not Pareto optimal
+
     return True
 
 
@@ -64,42 +85,63 @@ def calculate_social_welfare(users, frequencies):
     """
     Calculates the total social welfare as the sum of utilities.
     """
-    return sum(calculate_utility(user, frequencies) for user in users)
+    return sum(calculate_utility(user, frequencies) for user in users if user.is_broadcasting)
 
 
-def plot_utility_graph(users, frequencies, nash_states, pareto_states, max_social_welfare_state):
+def plot_utility_graph(users, frequencies):
     """
-    Plots a utility graph highlighting Nash equilibrium, Pareto frontier, and max social welfare.
+    Plots the utilities of all users for visualization.
     """
-    utilities = [(calculate_utility(users[0], frequencies), calculate_utility(users[1], frequencies)) for state in
-                 nash_states + pareto_states + [max_social_welfare_state]]
-    x, y = zip(*utilities)
+    utilities = [calculate_utility(user, frequencies) for user in users]
+    labels = [str(user) for user in users]
 
-    plt.figure(figsize=(8, 6))
-    plt.scatter(x, y, color='grey', label='All States', alpha=0.5)
+    plt.figure(figsize=(10, 6))
+    plt.bar(labels, utilities)
+    plt.xlabel('Users')
+    plt.ylabel('Utility')
+    plt.title('Utility Distribution Among Users')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.show()
 
-    # Highlight Nash equilibria
-    nash_utilities = [(calculate_utility(users[0], frequencies), calculate_utility(users[1], frequencies)) for state in
-                      nash_states]
-    if nash_utilities:
-        nx, ny = zip(*nash_utilities)
-        plt.scatter(nx, ny, color='blue', label='Nash Equilibrium')
 
-    # Highlight Pareto frontier
-    pareto_utilities = [(calculate_utility(users[0], frequencies), calculate_utility(users[1], frequencies)) for state
-                        in pareto_states]
-    if pareto_utilities:
-        px, py = zip(*pareto_utilities)
-        plt.scatter(px, py, color='green', label='Pareto Frontier')
+def plot_lots(users, frequencies):
+    utilities = [calculate_utility(user, frequencies) for user in users]
 
-    # Highlight max social welfare
-    sw_x, sw_y = calculate_utility(users[0], max_social_welfare_state), calculate_utility(users[1],
-                                                                                          max_social_welfare_state)
-    plt.scatter([sw_x], [sw_y], color='red', label='Max Social Welfare')
+    # Determine the users in Nash equilibrium
+    nash_indices = [i for i, user in enumerate(users) if is_nash_equilibrium([user], frequencies)]
 
-    plt.xlabel('Utility of User 1')
-    plt.ylabel('Utility of User 2')
+    # Identify Pareto optimal points
+    pareto_indices = [
+        i for i, utility in enumerate(utilities)
+        if all(utility >= other for j, other in enumerate(utilities) if j != i)
+    ]
+    pareto_utilities = [utilities[i] for i in pareto_indices]
+
+    # Plot utilities for all users
+    plt.figure(figsize=(10, 6))
+    plt.scatter(range(len(utilities)), utilities, label='All Users', color='blue', alpha=0.7)
+
+    # Highlight Pareto-optimal utilities
+    plt.scatter(pareto_indices, pareto_utilities, color='red', label='Pareto Optimal')
+
+    # Highlight users in Nash equilibrium with a different marker (e.g., 'x')
+    plt.scatter(nash_indices, [utilities[i] for i in nash_indices], color='green', label='Nash Equilibrium', marker='x')
+
+    # Draw Pareto Frontier Line
+    pareto_indices, pareto_utilities = zip(*sorted(zip(pareto_indices, pareto_utilities)))
+    plt.plot(pareto_indices, pareto_utilities, linestyle='--', color='red', label='Pareto Frontier')
+
+    # Social welfare
+    social_welfare = sum(utilities)
+    plt.axhline(social_welfare, color='purple', linestyle='-.', label=f'Social Welfare: {social_welfare:.2f}')
+
+    # Customize the plot
+    plt.xlabel('User Index')
+    plt.ylabel('Utility')
+    plt.title('Pareto Frontier of Spectrum Allocation')
     plt.legend()
-    plt.title('Utility Plan of Interference Channel Game')
     plt.grid(True)
+    plt.tight_layout()
+
     plt.show()

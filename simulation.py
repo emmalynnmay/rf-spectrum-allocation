@@ -1,7 +1,7 @@
-
 from radiograph import frequencies, system, users, utilities
-from data_generation import read_data
 from algorithms.coloring import allocate_with_coloring
+from radiograph.utilities import is_pareto_optimal, plot_utility_graph, plot_lots
+
 
 def allocate_freqs(spectrum, auths, cogs, verbose=True):
     if verbose:
@@ -39,15 +39,17 @@ def evaluate_allocation(users, frequencies, verbose=True):
     for user in users:
         util = utilities.calculate_utility(user, frequencies)
         if verbose:
-            print(f" - {user}: {util}")
+            print(f" - {user}: {round(util, 3)}")
         util_sum += util
     if verbose:
         print(f" Social Welfare: {round(util_sum, 3)}")
     
         print(f"\nIs in Nash Equilibrium? {utilities.is_nash_equilibrium(users, frequencies)}")
 
-    #TODO: check pareto optimality
+        print(f"Is Pareto Optimal? {is_pareto_optimal(users, frequencies)}")
 
-    #TODO: plot utility graph
+        plot_utility_graph(users, frequencies)
+        plot_lots(users, frequencies)
+
 
     return round(util_sum, 3)
