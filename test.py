@@ -256,7 +256,7 @@ class TestMisc(unittest.TestCase):
         self.assertEqual(cog1.active_frequency, freq1)
         self.assertEqual(cog1.isActive, True)
 
-        cog2 = CognitiveUser(sim, 0, 1) #requires that transmit_dist is more than 1, so do that for sure
+        cog2 = CognitiveUser(sim, 0, 1)
         cog2.set_frequency(freq1)
         self.assertNotIn(cog2, freq1.assigned_to)
         self.assertEqual(cog2.active_frequency, None)

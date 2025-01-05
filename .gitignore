@@ -7,6 +7,7 @@ __pycache__/
 __pycache__
 my_env
 *.mov
+*.mp4
 
 # Logs
 logs
